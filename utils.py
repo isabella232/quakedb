@@ -61,7 +61,10 @@ def HttpCsvResponse(querySet):
     fieldnames = ['Year', 'Month', 'Day', 'Latitude (N)', 'Longitude (W)', 'Depth (km)', 'Hours', 'Minutes', 'Seconds', 'Mag/Int', 'Location', 'Source Catalog']
     csvOut = FakeFile()
     csvWriter = csv.DictWriter(csvOut, fieldnames)
-    csvWriter.writeheader()
+    headerRow = {}
+    for header in fieldnames: 
+        headerRow[header] = header
+    csvWriter.writerow(headerRow)
     
     for f in querySet:
         row = {
