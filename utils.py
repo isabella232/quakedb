@@ -5,62 +5,29 @@ from django.http import HttpResponse
 import json, csv
 
 def HttpSimpleJsonResponse(querySet, single=True):
-    output = list()
-    for eqData in querySet:
-        feature = {
-            "id": eqData.pk,
-            "date": eqData.isodate(),
-            "depth": eqData.depth,
-            "magnitude": eqData.magnitude,
-            "type": eqData.type,
-            "location": eqData.location,    
-            "geom": eqData.geom.wkt       
-        }
-        output.append(feature)
-        
-    if single: output = feature
-    return HttpResponse(json.dumps(output), content_type="application/json")
+    response = HttpResponse("", content_type='application/json')
+    if not single: response.write('[')
+    lines = ','.join(['{"id":%s,"date":"%s","depth":%s,"magnitude":"%s","type":"%s","location":"%s","geom":"%s"}' % (data.pk,data.isodate(),data.depth,data.magnitude,data.type,data.location,data.geom.wkt) for data in querySet])
+    response.write(lines)
+    if not single: response.write(']')
+    return response
 
 def HttpGeoJsonResponse(querySet, single=True):
-    output = { "type": "FeatureCollection", "features": list() }
-    for eqData in querySet:
-        feature = {
-            "type": "Feature",
-            "id": eqData.pk,
-            "properties": {
-                "date": eqData.isodate(),
-                "depth": eqData.depth,
-                "magnitude": eqData.magnitude,
-                "type": eqData.type,
-                "location": eqData.location,                       
-            },
-            "geometry": json.loads(eqData.geom.json)       
-        }
-        output['features'].append(feature)
-    if single: output = feature
-    return HttpResponse(json.dumps(output), content_type="application/json")
+    response = HttpResponse("", content_type='application/json')
+    if not single: response.write('{"type":"FeatureCollection","features":[')
+    lines = ','.join(['{"type":"Feature","id":%s,"geometry":%s,"properties":{"date":"%s","depth":%s,"magnitude":"%s","type":"%s","location":"%s"}}' % (data.id,data.geom.json,data.isodate(),data.depth,data.magnitude,data.type,data.location) for data in querySet])
+    response.write(lines)
+    if not single: response.write(']}')
+    return response
 
 def HttpKmlResponse(querySet, single=True):
-    context = { 'features': list() }
-    for feature in querySet:
-        context['features'].append({
-            'name': feature.__unicode__(),
-            'description': 'There will be a description here',
-            'geom': feature.geom.kml
-        })
-        
-    return render_to_response("kml.xml", context, mimetype='application/vnd.google-earth.kml+xml')
+    context = { 'features': [ { 'name': feature.__unicode__(), 'description': 'Soon to come', 'geom': feature.geom.kml } for feature in querySet ] }
+    return render_to_response("kml.xml", context, mimetype='application/vnd.google-earth.kml+xml')    
 
-def HttpCsvResponse(querySet):
-    class FakeFile:
-        def __init__(self):
-            self.output = ""
-        def write(self, data):
-            self.output = self.output + str(data)
-            
+def HttpCsvResponse(querySet):            
     fieldnames = ['Year', 'Month', 'Day', 'Latitude (N)', 'Longitude (W)', 'Depth (km)', 'Hours', 'Minutes', 'Seconds', 'Mag/Int', 'Location', 'Source Catalog']
-    csvOut = FakeFile()
-    csvWriter = csv.DictWriter(csvOut, fieldnames)
+    response = HttpResponse("", content_type='text/csv')
+    csvWriter = csv.DictWriter(response, fieldnames)
     headerRow = {}
     for header in fieldnames: 
         headerRow[header] = header
@@ -83,5 +50,5 @@ def HttpCsvResponse(querySet):
         }
         csvWriter.writerow(row)
         
-    return HttpResponse(csvOut.output, content_type='text/csv')
+    return response
         

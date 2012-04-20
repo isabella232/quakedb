@@ -1,0 +1,1 @@
+var jsonFeatures = {{ featureCollection|safe }};

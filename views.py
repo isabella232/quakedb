@@ -21,8 +21,8 @@ def byResource(req, quakeId, extension):
         return HttpResponseNotAllowed(['GET'])
     
 def contentNegotiation(req, extension, queryset, multiple=True):
-    acceptedExtensions = {'.json': 'json', '.geojson': 'geojson', '.kml': 'kml', '.csv': 'csv'}
-    acceptedTypes = {'application/json': 'json', 'application/geojson': 'geojson', 'application/vnd.google-earth.kml+xml': 'kml', 'text/csv': 'csv'}
+    acceptedExtensions = {'.json': 'json', '.geojson': 'geojson', '.kml': 'kml', '.csv': 'csv', '.js': 'js'}
+    acceptedTypes = {'application/json': 'json', 'application/geojson': 'geojson', 'application/vnd.google-earth.kml+xml': 'kml', 'text/csv': 'csv', 'text/javascript': 'js'}
     accept = req.META['HTTP_ACCEPT'].lower()
     
     if extension != None and extension in acceptedExtensions.keys():
@@ -42,7 +42,11 @@ def contentNegotiation(req, extension, queryset, multiple=True):
         return HttpKmlResponse(queryset)
     elif format == 'csv':
         return HttpCsvResponse(queryset)
+    elif format == 'js':
+        context = { "featureCollection": HttpGeoJsonResponse(queryset, multiple).content }
+        return render_to_response('data.js', context, mimetype='text/javascript')
     
 
 def map(req):
     return render_to_response("map.html")
+    
