@@ -27,7 +27,7 @@ class EarthquakeData(models.Model):
         
     date = models.DateTimeField()
     depth = models.FloatField()
-    magnitude = models.CharField(max_length=6)
+    magnitude = models.CharField(max_length=20)
     type = models.CharField(max_length=5, choices=magnitude_types)
     location = models.CharField(max_length=50, blank=True)
     source_catalog = models.CharField(max_length=50)

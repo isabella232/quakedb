@@ -24,6 +24,10 @@ def HttpKmlResponse(querySet, single=True):
     context = { 'features': [ { 'name': feature.__unicode__(), 'description': 'Soon to come', 'geom': feature.geom.kml } for feature in querySet ] }
     return render_to_response("kml.xml", context, mimetype='application/vnd.google-earth.kml+xml')    
 
+def HttpJsResponse(querySet, single=True):
+    context = { "featureCollection": HttpGeoJsonResponse(queryset, single).content }
+    return render_to_response('data.js', context, mimetype='text/javascript')
+
 def HttpCsvResponse(querySet):            
     fieldnames = ['Year', 'Month', 'Day', 'Latitude (N)', 'Longitude (W)', 'Depth (km)', 'Hours', 'Minutes', 'Seconds', 'Mag/Int', 'Location', 'Source Catalog']
     response = HttpResponse("", content_type='text/csv')

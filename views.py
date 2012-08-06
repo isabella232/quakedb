@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotAllowed, Http404
 from django.shortcuts import get_object_or_404, render_to_response
 from django.contrib.gis.geos import Polygon
-from utils import HttpSimpleJsonResponse, HttpGeoJsonResponse, HttpKmlResponse, HttpCsvResponse
+from utils import HttpSimpleJsonResponse, HttpGeoJsonResponse, HttpKmlResponse, HttpCsvResponse, HttpJsResponse
 from models import EarthquakeData
 import mimeparse, datetime
 
@@ -21,9 +21,18 @@ def byResource(req, quakeId, extension):
     else:
         return HttpResponseNotAllowed(['GET'])
     
-def contentNegotiation(req, extension, queryset, multiple=True):
-    acceptedExtensions = {'.json': 'json', '.geojson': 'geojson', '.kml': 'kml', '.csv': 'csv', '.js': 'js'}
-    acceptedTypes = {'application/json': 'json', 'application/geojson': 'geojson', 'application/vnd.google-earth.kml+xml': 'kml', 'text/csv': 'csv', 'text/javascript': 'js'}
+def contentNegotiation(req, extension, queryset, single=True):
+    acceptedExtensions = {'.json': 'json', 
+                          '.geojson': 'geojson', 
+                          '.kml': 'kml', 
+                          '.csv': 'csv', 
+                          '.js': 'js'}
+    acceptedTypes = {'application/json': 'json', 
+                     'application/geojson': 'geojson', 
+                     'application/vnd.google-earth.kml+xml': 'kml', 
+                     'text/csv': 'csv', 
+                     'text/javascript': 'js',
+                     'application/javascript': 'js'}
     accept = req.META['HTTP_ACCEPT'].lower()
     
     if extension != None and extension in acceptedExtensions.keys():
@@ -36,16 +45,15 @@ def contentNegotiation(req, extension, queryset, multiple=True):
             return HttpResponse('Not Acceptable', status=406)
             
     if format == 'json':
-        return HttpSimpleJsonResponse(queryset, multiple)
+        return HttpSimpleJsonResponse(queryset, single)
     elif format == 'geojson':
-        return HttpGeoJsonResponse(queryset, multiple)
+        return HttpGeoJsonResponse(queryset, single)
     elif format == 'kml':
         return HttpKmlResponse(queryset)
     elif format == 'csv':
         return HttpCsvResponse(queryset)
     elif format == 'js':
-        context = { "featureCollection": HttpGeoJsonResponse(queryset, multiple).content }
-        return render_to_response('data.js', context, mimetype='text/javascript')
+        return HttpJsResponse(queryset, single)
     
 def queryParser(req):
     query = req.GET.copy()
