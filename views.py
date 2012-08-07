@@ -76,7 +76,15 @@ def queryParser(req):
         query['date__range'] = (startdate, enddate)
         
     
-    return EarthquakeData.objects.filter(**query.dict())
+    # This works in Django 1.4, but not 1.3
+    #return EarthquakeData.objects.filter(**query.dict())
+    
+    # So we do this...
+    q = dict()
+    for key, value in query.iteritems():
+        if isinstance(value, list): value = value[0]
+        q[key] = value
+    return EarthquakeData.objects.filter(**q) 
     
 def map(req):
     return render_to_response("map.html")
