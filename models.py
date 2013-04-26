@@ -1,5 +1,7 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
+from django.conf import settings
+
 import re
 
 magnitude_types = (
@@ -24,15 +26,22 @@ magnitude_types = (
 class EarthquakeData(models.Model):
     class Meta:
         verbose_name_plural = 'Earthquake data'
+        ordering = ['-date']
         
     date = models.DateTimeField()
-    depth = models.FloatField()
-    magnitude = models.CharField(max_length=20)
-    type = models.CharField(max_length=5, choices=magnitude_types)
-    location = models.CharField(max_length=50, blank=True)
-    source_catalog = models.CharField(max_length=50)
     latitude = models.FloatField()
     longitude = models.FloatField()
+    depth = models.FloatField()
+    magnitude = models.CharField(max_length=20)
+    calculated_magnitude = models.FloatField(null=True, blank=True)
+    type = models.CharField(max_length=5, choices=magnitude_types)
+    rms = models.FloatField(null=True) # seconds, decimal
+    erh = models.FloatField(null=True) # km, decimal
+    erz = models.FloatField(null=True) # km, decimal
+    source_catalog = models.CharField(max_length=50)
+    location = models.CharField(max_length=50, blank=True)
+    waveform_file = models.FileField(blank=True, null=True, upload_to=settings.MEDIA_ROOT + "/waveforms/") # upload a waveform file
+
     geom = models.PointField(srid=4326, blank=True, null=True)
     objects = models.GeoManager()
     
@@ -41,7 +50,13 @@ class EarthquakeData(models.Model):
     
     def isodate(self):
         return self.date.isoformat()
-    
+
+    def utcDate(self):
+        return self.isodate().split("T")[0]
+
+    def utcTime(self):
+        return self.isodate().split("T")[1]
+
     def occurance_date(self):
         return "%s/%s/%s" % (self.month(), self.day(), self.year())
         
@@ -68,6 +83,25 @@ class EarthquakeData(models.Model):
     def seconds(self):
         m = re.search(':(?P<sec>\d{2})$', self.isodate())
         return m.group('sec')
-    
+
+    def calculate_magnitude(self):
+        if self.magnitude == "I":
+            return float(1)
+        elif self.magnitude == "II":
+            return float(3)
+        elif self.magnitude == "III":
+            return float(3)
+        elif self.magnitude == "IV":
+            return float(4)
+        elif self.magnitude == "V":
+            return float(4)
+        elif self.magnitude == "VI":
+            return float(5)
+        elif self.magnitude == "VII":
+            return float(6)
+        else:
+            return float(self.magnitude)
+
     def clean(self):
         self.geom = GEOSGeometry('POINT(' + str(self.longitude) + ' ' + str(self.latitude) + ')')
+        self.calculated_magnitude = self.calculate_magnitude()

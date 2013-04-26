@@ -1,9 +1,13 @@
-from django.http import HttpResponse, HttpResponseNotAllowed, Http404
+import datetime
+
+from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, render_to_response
 from django.contrib.gis.geos import Polygon
+import mimeparse
+
 from utils import HttpSimpleJsonResponse, HttpGeoJsonResponse, HttpKmlResponse, HttpCsvResponse, HttpJsResponse
 from models import EarthquakeData
-import mimeparse, datetime
+
 
 def byCollection(req, extension):
     quakes = queryParser(req)
