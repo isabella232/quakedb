@@ -40,7 +40,7 @@ class EarthquakeData(models.Model):
     erz = models.FloatField(null=True) # km, decimal
     source_catalog = models.CharField(max_length=50)
     location = models.CharField(max_length=50, blank=True)
-    waveform_file = models.FileField(blank=True, null=True, upload_to=settings.MEDIA_ROOT + "/waveforms/") # upload a waveform file
+    waveform_file = models.FileField(blank=True, null=True, upload_to="waveforms/") # upload a waveform file
 
     geom = models.PointField(srid=4326, blank=True, null=True)
     objects = models.GeoManager()
