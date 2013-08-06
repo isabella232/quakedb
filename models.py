@@ -41,6 +41,7 @@ class EarthquakeData(models.Model):
     source_catalog = models.CharField(max_length=50)
     location = models.CharField(max_length=50, blank=True)
     waveform_file = models.FileField(blank=True, null=True, upload_to="waveforms/") # upload a waveform file
+    notes = models.TextField(blank=True)
 
     geom = models.PointField(srid=4326, blank=True, null=True)
     objects = models.GeoManager()
