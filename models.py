@@ -35,9 +35,9 @@ class EarthquakeData(models.Model):
     magnitude = models.CharField(max_length=20)
     calculated_magnitude = models.FloatField(null=True, blank=True)
     type = models.CharField(max_length=5, choices=magnitude_types)
-    rms = models.FloatField(null=True) # seconds, decimal
-    erh = models.FloatField(null=True) # km, decimal
-    erz = models.FloatField(null=True) # km, decimal
+    rms = models.FloatField(null=True, blank=True) # seconds, decimal
+    erh = models.FloatField(null=True, blank=True) # km, decimal
+    erz = models.FloatField(null=True, blank=True) # km, decimal
     source_catalog = models.CharField(max_length=50)
     location = models.CharField(max_length=50, blank=True)
     waveform_file = models.FileField(blank=True, null=True, upload_to="waveforms/") # upload a waveform file
