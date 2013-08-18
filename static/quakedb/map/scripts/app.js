@@ -12,85 +12,55 @@
 
   xhr_url = "http://data.usgin.org/arizona/ows?service=WFS&version=1.0.0&request=GetFeature&outputFormat=text/javascript&typeName=azgs:earthquakedata&outputformat=json";
 
-  app.center = ol.proj.transform([-112.085034, 34.267990], 'EPSG:4326', 'EPSG:3857');
+  app.osm_aerial = new L.TileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
 
-  app.osm_layer = new ol.layer.TileLayer({
-    source: new ol.source.MapQuestOpenAerial()
-  });
-
-  ol.expr.register('resolution', function() {
-    return app.map.getView().getView2D().getResolution();
-  });
-
-  app.quakes_layer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      parser: new ol.parser.GeoJSON(),
-      url: xhr_url
-    }),
-    style: new ol.style.Style({
-      rules: [
-        new ol.style.Rule({
-          symbolizers: [
-            new ol.style.Shape({
-              size: 20,
-              strokeColor: '#FFFF00',
-              strokeOpacity: 1,
-              fillColor: '#FF0000',
-              fillOpacity: 0.6
-            })
-          ]
-        })
-      ]
-    })
-  });
-
-  app.view = new ol.View2D({
-    center: app.center,
+  app.map = new L.Map('map', {
+    center: [33.867990, -111.985034],
     zoom: 7
   });
 
-  app.map = new ol.Map({
-    target: 'map',
-    layers: [app.osm_layer, app.quakes_layer],
-    renderer: ol.RendererHint.CANVAS,
-    view: app.view
-  });
+  app.map.addLayer(app.osm_aerial);
 
-  app.margin = {
-    top: 20,
-    right: 20,
-    bottom: 30,
-    left: 40
-  };
+  app.svg = d3.select(app.map.getPanes().overlayPane).append('svg');
 
-  app.width = 960 - app.margin.left - app.margin.right;
-
-  app.height = 500 - app.margin.top - app.margin.bottom;
-
-  app.x = d3.scale.linear().range([0, app.width]);
-
-  app.y = d3.scale.linear().range([app.height, 0]);
-
-  app.x_axis = d3.svg.axis().scale(app.x).orient('bottom');
-
-  app.y_axis = d3.svg.axis().scale(app.y).orient('left');
-
-  app.svg = d3.select("body").append("svg").attr("width", app.width + app.margin.left + app.margin.right).attr("height", app.height + app.margin.top + app.margin.bottom).append("g").attr("transform", "translate(" + app.margin.left + "," + app.margin.top + ")");
+  app.g = app.svg.append('g').attr('class', 'leaflet-zoom-hide');
 
   d3.json(xhr_url, function(error, collection) {
-    app.x.domain(d3.extent(collection.features, function(d) {
-      return d.properties.calculated_magnitude;
-    })).nice();
-    app.y.domain(d3.extent(collection.features, function(d) {
-      return d.properties.depth;
-    })).nice();
-    app.svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + app.height + ")").call(app.x_axis).append("text").attr("class", "label").attr("x", app.width).attr("y", -6).style("text-anchor", "end").text("Magnitude");
-    app.svg.append("g").attr("class", "y axis").call(app.y_axis).append("text").attr("class", "label").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", ".71em").style("text-anchor", "end").text("Depth");
-    return app.svg.selectAll(".dot").data(collection.features).enter().append("circle").attr("class", "dot").attr("r", 3.5).attr("cx", function(d) {
-      return app.x(d.properties.calculated_magnitude);
-    }).attr("cy", function(d) {
-      return app.y(d.properties.depth);
-    }).style("fill", "#000");
+    var project, reset;
+    console.log(collection.features);
+    reset = function() {
+      app.bottomLeft = project(app.bounds[0]);
+      app.topRight = project(app.bounds[1]);
+      app.svg.attr('width', app.topRight[0] - app.bottomLeft[0]).attr('height', app.bottomLeft[1] - app.topRight[1]).style('margin-left', app.bottomLeft[0] + 'px').style('margin-top', app.topRight[1] + 'px');
+      app.g.attr('transform', 'translate(' + -app.bottomLeft[0] + ',' + -app.topRight[1] + ')');
+      return app.feature.attr('d', app.path);
+    };
+    project = function(x) {
+      app.point = app.map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+      return [app.point.x, app.point.y];
+    };
+    app.bounds = d3.geo.bounds(collection);
+    console.log(app.bounds);
+    app.path = d3.geo.path().projection(project);
+    app.feature = app.g.selectAll('path').data(collection.features).enter().append('path').attr('cx', function(d) {
+      return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
+    }).attr('cy', function(d) {
+      return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
+    }).attr('r', function(d) {
+      if (d.properties.calculated_magnitude > 5) {
+        return 20;
+      }
+    }).style('fill', function(d) {
+      if (d.properties.calculated_magnitude > 5) {
+        return 'red';
+      } else {
+        return 'blue';
+      }
+    }).style('stroke', 'red');
+    app.map.on('viewreset', reset);
+    return reset();
   });
+
+  "app.margin = {top:20, right:20, bottom:30, left:40}\napp.width = 960 - app.margin.left - app.margin.right\napp.height = 500 - app.margin.top - app.margin.bottom\n\napp.x = d3.scale.linear()\n    .range([0, app.width])\napp.y = d3.scale.linear()\n    .range([app.height, 0])\napp.x_axis = d3.svg.axis()\n    .scale(app.x)\n    .orient('bottom')\napp.y_axis = d3.svg.axis()\n    .scale(app.y)\n    .orient('left')\n\napp.svg = d3.select(\"body\").append(\"svg\")\n    .attr(\"width\", app.width + app.margin.left + app.margin.right)\n    .attr(\"height\", app.height + app.margin.top + app.margin.bottom)\n    .append(\"g\")\n    .attr(\"transform\", \"translate(\" + app.margin.left + \",\" + app.margin.top + \")\")\n\nd3.json xhr_url, (error, collection) ->\n    app.x.domain(d3.extent(collection.features, (d) -> return d.properties.calculated_magnitude) ).nice()\n    app.y.domain(d3.extent(collection.features, (d) -> return d.properties.depth )).nice()\n\n    app.svg.append(\"g\")\n        .attr(\"class\", \"x axis\")\n        .attr(\"transform\", \"translate(0,\" + app.height + \")\")\n        .call(app.x_axis)\n        .append(\"text\")\n        .attr(\"class\", \"label\")\n        .attr(\"x\", app.width)\n        .attr(\"y\", -6)\n        .style(\"text-anchor\", \"end\")\n        .text(\"Magnitude\")\n    \n    app.svg.append(\"g\")\n        .attr(\"class\", \"y axis\")\n        .call(app.y_axis)\n        .append(\"text\")\n        .attr(\"class\", \"label\")\n        .attr(\"transform\", \"rotate(-90)\")\n        .attr(\"y\", 6)\n        .attr(\"dy\", \".71em\")\n        .style(\"text-anchor\", \"end\")\n        .text(\"Depth\")\n    \n    app.svg.selectAll(\".dot\")\n        .data(collection.features)\n        .enter().append(\"circle\")\n        .attr(\"class\", \"dot\")\n        .attr(\"r\", 3.5)\n        .attr(\"cx\", (d) -> return app.x(d.properties.calculated_magnitude) )\n        .attr(\"cy\", (d) -> return app.y(d.properties.depth) )\n        .style(\"fill\", \"#000\")";
 
 }).call(this);
