@@ -27,12 +27,25 @@
 
   d3.json(xhr_url, function(error, collection) {
     var project, reset;
-    console.log(collection.features);
+    collection.features.forEach(function(d) {
+      return d.LatLng = new L.LatLng(d.geometry.coordinates[1], d.geometry.coordinates[0]);
+    });
     reset = function() {
       app.bottomLeft = project(app.bounds[0]);
       app.topRight = project(app.bounds[1]);
       app.svg.attr('width', app.topRight[0] - app.bottomLeft[0]).attr('height', app.bottomLeft[1] - app.topRight[1]).style('margin-left', app.bottomLeft[0] + 'px').style('margin-top', app.topRight[1] + 'px');
       app.g.attr('transform', 'translate(' + -app.bottomLeft[0] + ',' + -app.topRight[1] + ')');
+      app.feature.attr("cx", function(d) {
+        return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
+      }).attr("cy", function(d) {
+        return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
+      }).attr("r", function(d) {
+        if (d.properties.calculated_magnitude > 5) {
+          return 10;
+        } else {
+          return 5;
+        }
+      });
       return app.feature.attr('d', app.path);
     };
     project = function(x) {
@@ -40,21 +53,22 @@
       return [app.point.x, app.point.y];
     };
     app.bounds = d3.geo.bounds(collection);
-    console.log(app.bounds);
     app.path = d3.geo.path().projection(project);
-    app.feature = app.g.selectAll('path').data(collection.features).enter().append('path').attr('cx', function(d) {
+    app.feature = app.g.selectAll('circle').data(collection.features).enter().append('circle').attr('cx', function(d) {
       return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
     }).attr('cy', function(d) {
       return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
     }).attr('r', function(d) {
       if (d.properties.calculated_magnitude > 5) {
-        return 20;
+        return 10;
+      } else {
+        return 5;
       }
     }).style('fill', function(d) {
       if (d.properties.calculated_magnitude > 5) {
-        return 'red';
+        return 'yellow';
       } else {
-        return 'blue';
+        return 'orange';
       }
     }).style('stroke', 'red');
     app.map.on('viewreset', reset);
