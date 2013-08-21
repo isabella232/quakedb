@@ -12,24 +12,43 @@
 
   xhr_url = "http://data.usgin.org/arizona/ows?service=WFS&version=1.0.0&request=GetFeature&outputFormat=text/javascript&typeName=azgs:earthquakedata&outputformat=json";
 
-  app.osm_aerial = new L.TileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+  app.classes = 9;
+
+  app.scheme_id = "YlOrRd";
+
+  app.scheme = colorbrewer[app.scheme_id][app.classes];
+
+  console.log(app.scheme);
+
+  app.esri_aerial = new L.TileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
 
   app.map = new L.Map('map', {
     center: [33.867990, -111.985034],
     zoom: 7
   });
 
-  app.map.addLayer(app.osm_aerial);
+  app.map.addLayer(app.esri_aerial);
+
+  app.bbox_string = app.map.getBounds().toBBoxString();
+
+  app.bbox = app.bbox_string.split(',');
+
+  app.bbox_array = [[app.bbox[0], app.bbox[1]], [app.bbox[2], app.bbox[3]]];
 
   app.svg = d3.select(app.map.getPanes().overlayPane).append('svg');
 
   app.g = app.svg.append('g').attr('class', 'leaflet-zoom-hide');
 
   d3.json(xhr_url, function(error, collection) {
-    var project, reset;
+    var outInterval, project, reset, setInterval;
+    app.scaled_data = [];
     collection.features.forEach(function(d) {
-      return d.LatLng = new L.LatLng(d.geometry.coordinates[1], d.geometry.coordinates[0]);
+      return app.scaled_data.push(Math.abs(d.properties.calculated_magnitude));
     });
+    app.min = d3.min(app.scaled_data);
+    app.max = d3.max(app.scaled_data);
+    console.log(app.min);
+    console.log(app.max);
     reset = function() {
       app.bottomLeft = project(app.bounds[0]);
       app.topRight = project(app.bounds[1]);
@@ -39,12 +58,6 @@
         return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
       }).attr("cy", function(d) {
         return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
-      }).attr("r", function(d) {
-        if (d.properties.calculated_magnitude > 5) {
-          return 10;
-        } else {
-          return 5;
-        }
       });
       return app.feature.attr('d', app.path);
     };
@@ -52,29 +65,26 @@
       app.point = app.map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
       return [app.point.x, app.point.y];
     };
-    app.bounds = d3.geo.bounds(collection);
+    setInterval = function() {
+      return d3.select(this).style('stroke-width', 3).style('stroke', app.scheme[app.classes - 1]).transition().ease("linear-in").duration(1).attr("r", 20);
+    };
+    outInterval = function() {
+      return d3.select(this).style('stroke-width', 1).style('stroke', app.scheme[app.classes - 1]).transition().ease('linear-out').duration(1).attr("r", 5);
+    };
+    app.bounds = app.bbox_array;
     app.path = d3.geo.path().projection(project);
+    console.log(d3.range(app.classes));
+    app.scale = d3.scale.linear().domain([app.min, app.max]).range(d3.range(app.classes));
+    console.log(app.scale);
     app.feature = app.g.selectAll('circle').data(collection.features).enter().append('circle').attr('cx', function(d) {
       return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
     }).attr('cy', function(d) {
       return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
-    }).attr('r', function(d) {
-      if (d.properties.calculated_magnitude > 5) {
-        return 10;
-      } else {
-        return 5;
-      }
-    }).style('fill', function(d) {
-      if (d.properties.calculated_magnitude > 5) {
-        return 'yellow';
-      } else {
-        return 'orange';
-      }
-    }).style('stroke', 'red');
+    }).attr('r', 5).style('fill', function(d) {
+      return app.scheme[(app.scale(d.properties.calculated_magnitude) * 8).toFixed()];
+    }).style('stroke', app.scheme[app.classes - 1]).on('mouseover', setInterval).on('mouseout', outInterval);
     app.map.on('viewreset', reset);
     return reset();
   });
-
-  "app.margin = {top:20, right:20, bottom:30, left:40}\napp.width = 960 - app.margin.left - app.margin.right\napp.height = 500 - app.margin.top - app.margin.bottom\n\napp.x = d3.scale.linear()\n    .range([0, app.width])\napp.y = d3.scale.linear()\n    .range([app.height, 0])\napp.x_axis = d3.svg.axis()\n    .scale(app.x)\n    .orient('bottom')\napp.y_axis = d3.svg.axis()\n    .scale(app.y)\n    .orient('left')\n\napp.svg = d3.select(\"body\").append(\"svg\")\n    .attr(\"width\", app.width + app.margin.left + app.margin.right)\n    .attr(\"height\", app.height + app.margin.top + app.margin.bottom)\n    .append(\"g\")\n    .attr(\"transform\", \"translate(\" + app.margin.left + \",\" + app.margin.top + \")\")\n\nd3.json xhr_url, (error, collection) ->\n    app.x.domain(d3.extent(collection.features, (d) -> return d.properties.calculated_magnitude) ).nice()\n    app.y.domain(d3.extent(collection.features, (d) -> return d.properties.depth )).nice()\n\n    app.svg.append(\"g\")\n        .attr(\"class\", \"x axis\")\n        .attr(\"transform\", \"translate(0,\" + app.height + \")\")\n        .call(app.x_axis)\n        .append(\"text\")\n        .attr(\"class\", \"label\")\n        .attr(\"x\", app.width)\n        .attr(\"y\", -6)\n        .style(\"text-anchor\", \"end\")\n        .text(\"Magnitude\")\n    \n    app.svg.append(\"g\")\n        .attr(\"class\", \"y axis\")\n        .call(app.y_axis)\n        .append(\"text\")\n        .attr(\"class\", \"label\")\n        .attr(\"transform\", \"rotate(-90)\")\n        .attr(\"y\", 6)\n        .attr(\"dy\", \".71em\")\n        .style(\"text-anchor\", \"end\")\n        .text(\"Depth\")\n    \n    app.svg.selectAll(\".dot\")\n        .data(collection.features)\n        .enter().append(\"circle\")\n        .attr(\"class\", \"dot\")\n        .attr(\"r\", 3.5)\n        .attr(\"cx\", (d) -> return app.x(d.properties.calculated_magnitude) )\n        .attr(\"cy\", (d) -> return app.y(d.properties.depth) )\n        .style(\"fill\", \"#000\")";
 
 }).call(this);

@@ -3,22 +3,39 @@ if not root.app? then app = root.app = {} else app = root.app
 
 xhr_url = "http://data.usgin.org/arizona/ows?service=WFS&version=1.0.0&request=GetFeature&outputFormat=text/javascript&typeName=azgs:earthquakedata&outputformat=json"
 
-app.osm_aerial = new L.TileLayer 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+app.classes = 9
+app.scheme_id = "YlOrRd"
+app.scheme = colorbrewer[app.scheme_id][app.classes]
+
+console.log app.scheme
+
+app.esri_aerial = new L.TileLayer 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 
 app.map = new L.Map 'map',
     center: [33.867990, -111.985034]
     zoom: 7
 
-app.map.addLayer app.osm_aerial
+app.map.addLayer app.esri_aerial
+
+app.bbox_string = app.map.getBounds().toBBoxString()
+app.bbox = app.bbox_string.split(',')
+app.bbox_array = [[app.bbox[0],app.bbox[1]],[app.bbox[2],app.bbox[3]]]
 
 app.svg = d3.select(app.map.getPanes().overlayPane).append 'svg'
 app.g = app.svg.append('g').attr 'class', 'leaflet-zoom-hide'
 
 d3.json xhr_url, (error, collection) ->
-
+    
+    app.scaled_data = []
     collection.features.forEach (d) ->
-        d.LatLng = new L.LatLng(d.geometry.coordinates[1], d.geometry.coordinates[0])
+        app.scaled_data.push(Math.abs(d.properties.calculated_magnitude))
+    
+    app.min = d3.min(app.scaled_data)
+    app.max = d3.max(app.scaled_data)
 
+    console.log app.min
+    console.log app.max
+    
     reset = () ->
         app.bottomLeft = project(app.bounds[0])
         app.topRight = project(app.bounds[1])
@@ -32,7 +49,7 @@ d3.json xhr_url, (error, collection) ->
 
         app.feature.attr("cx",(d) -> return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )
                    .attr("cy",(d) -> return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )
-                   .attr("r",  (d) -> if (d.properties.calculated_magnitude > 5) then return 10 else 5)
+#                   .attr("r",  (d) -> d.properties.calculated_magnitude*4)
 
         app.feature.attr 'd', app.path
 
@@ -40,75 +57,48 @@ d3.json xhr_url, (error, collection) ->
         app.point = app.map.latLngToLayerPoint(new L.LatLng(x[1], x[0]))
         return [app.point.x, app.point.y]
 
-    app.bounds = d3.geo.bounds collection
+    setInterval = () ->
+        d3.select(@)
+            .style('stroke-width', 3)
+            .style('stroke', app.scheme[app.classes - 1])
+            .transition()
+            .ease("linear-in")
+            .duration(1)
+            .attr("r", 20)
+
+    outInterval = () ->
+        d3.select(@)
+            .style('stroke-width', 1)
+            .style('stroke', app.scheme[app.classes - 1])
+            .transition()
+            .ease('linear-out')
+            .duration(1)
+            .attr("r", 5)
+
+    app.bounds = app.bbox_array
     app.path = d3.geo.path().projection project
+
+    console.log d3.range(app.classes)
     
+    app.scale = d3.scale.linear()
+        .domain([app.min, app.max])
+        .range(d3.range(app.classes))
+    
+    console.log app.scale
+
     app.feature = app.g.selectAll('circle')
         .data(collection.features)
         .enter().append('circle')
         .attr('cx', (d) -> project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )
         .attr('cy', (d) -> project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )
-        .attr('r', (d) -> if (d.properties.calculated_magnitude > 5) then return 10 else 5)
-        .style('fill', (d) -> if (d.properties.calculated_magnitude > 5) then return 'yellow' else 'orange')
-        .style('stroke', 'red')
+        .attr('r', 5)
+        .style('fill', (d) -> app.scheme[(app.scale(d.properties.calculated_magnitude) * 8).toFixed()])
+        .style('stroke', app.scheme[app.classes - 1])
+#        .attr('r', (d) -> d.properties.calculated_magnitude*4)
+        .on('mouseover', setInterval)
+        .on('mouseout', outInterval)
         
     app.map.on 'viewreset', reset
     reset()
 
-"""
-app.margin = {top:20, right:20, bottom:30, left:40}
-app.width = 960 - app.margin.left - app.margin.right
-app.height = 500 - app.margin.top - app.margin.bottom
 
-app.x = d3.scale.linear()
-    .range([0, app.width])
-app.y = d3.scale.linear()
-    .range([app.height, 0])
-app.x_axis = d3.svg.axis()
-    .scale(app.x)
-    .orient('bottom')
-app.y_axis = d3.svg.axis()
-    .scale(app.y)
-    .orient('left')
-
-app.svg = d3.select("body").append("svg")
-    .attr("width", app.width + app.margin.left + app.margin.right)
-    .attr("height", app.height + app.margin.top + app.margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + app.margin.left + "," + app.margin.top + ")")
-
-d3.json xhr_url, (error, collection) ->
-    app.x.domain(d3.extent(collection.features, (d) -> return d.properties.calculated_magnitude) ).nice()
-    app.y.domain(d3.extent(collection.features, (d) -> return d.properties.depth )).nice()
-
-    app.svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + app.height + ")")
-        .call(app.x_axis)
-        .append("text")
-        .attr("class", "label")
-        .attr("x", app.width)
-        .attr("y", -6)
-        .style("text-anchor", "end")
-        .text("Magnitude")
-    
-    app.svg.append("g")
-        .attr("class", "y axis")
-        .call(app.y_axis)
-        .append("text")
-        .attr("class", "label")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text("Depth")
-    
-    app.svg.selectAll(".dot")
-        .data(collection.features)
-        .enter().append("circle")
-        .attr("class", "dot")
-        .attr("r", 3.5)
-        .attr("cx", (d) -> return app.x(d.properties.calculated_magnitude) )
-        .attr("cy", (d) -> return app.y(d.properties.depth) )
-        .style("fill", "#000")
-"""
