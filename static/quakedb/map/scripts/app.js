@@ -76,7 +76,7 @@
     console.log(d3.range(app.classes));
     app.scale = d3.scale.linear().domain([app.min, app.max]).range(d3.range(app.classes));
     console.log(app.scale);
-    app.feature = app.g.selectAll('circle').data(collection.features).enter().append('circle').attr('cx', function(d) {
+    app.feature = app.g.selectAll('circle').data(collection.features).enter().append('svg:circle').attr('cx', function(d) {
       return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
     }).attr('cy', function(d) {
       return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];

@@ -65,7 +65,7 @@ d3.json xhr_url, (error, collection) ->
             .ease("linear-in")
             .duration(1)
             .attr("r", 20)
-
+            
     outInterval = () ->
         d3.select(@)
             .style('stroke-width', 1)
@@ -88,7 +88,7 @@ d3.json xhr_url, (error, collection) ->
 
     app.feature = app.g.selectAll('circle')
         .data(collection.features)
-        .enter().append('circle')
+        .enter().append('svg:circle')
         .attr('cx', (d) -> project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )
         .attr('cy', (d) -> project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )
         .attr('r', 5)
