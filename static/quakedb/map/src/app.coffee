@@ -17,6 +17,26 @@ app.map = new L.Map 'map',
 
 app.map.addLayer app.esri_aerial
 
+
+sidebarControl = L.Control.extend
+    options:
+        position: 'topleft'
+    onAdd: (map) ->
+        container = L.DomUtil.create('div','my-custom-control')
+        container.title = 'Show me the money!'
+        $(container).addClass 'glyphicon glyphicon-indent-right'
+        return container
+app.map.addControl(new sidebarControl())
+
+magnitudeControl = L.Control.extend
+    options:
+        position: 'bottomleft'
+    onAdd: (map) ->
+        container = L.DomUtil.create('div', 'eq-magnitude-control')
+        $(container).append '<div id="data-slider-eq-magnitude"></div>'
+        return container
+app.map.addControl(new magnitudeControl())
+
 app.bbox_string = app.map.getBounds().toBBoxString()
 app.bbox = app.bbox_string.split(',')
 app.bbox_array = [[app.bbox[0],app.bbox[1]],[app.bbox[2],app.bbox[3]]]
@@ -102,3 +122,28 @@ d3.json xhr_url, (error, collection) ->
     reset()
 
 
+    
+    
+    
+$.asm = {};
+$.asm.panels = 1;
+
+sidebar = (panels) ->
+    $.asm.panels = panels
+    if panels == 1
+        $('#sidebar').animate
+            right:-500
+    else if panels == 2
+        $('#sidebar').animate
+            right:0
+    $('#sidebar').height($(window).height());
+
+$('.my-custom-control').click () ->
+    if $.asm.panels == 1
+        return sidebar(2)
+    else
+        return sidebar(1)
+
+$(() ->
+    $('#data-slider-eq-magnitude').slider
+        range:true )

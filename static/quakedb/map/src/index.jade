@@ -3,11 +3,16 @@ html(lang="en")
     head
         meta(charset="utf-8")
         title Arizona Earthquakes
+        link(rel="stylesheet", href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+        link(rel="stylesheet", href="vendor/bootstrap-3.0.0/dist/css/bootstrap.min.css")
         link(rel="stylesheet", href="vendor/leafletjs/leaflet.css")
         link(rel="stylesheet", href="styles/base.css")
     body
-        #map(style="position:absolute;top:0;left:0;right:0;bottom:0;")<!---(style="height:700px;width:1000px;")--->
-        script(src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js")
+        #map.col-md-12(style="position:absolute;top:0;left:0;right:0;bottom:0;")
+        #sidebar
+        script(src="http://code.jquery.com/jquery-1.9.1.js")
+        script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
+        script(src="vendor/bootstrap-3.0.0/dist/js/bootstrap.min.js")
         script(src="http://d3js.org/d3.v3.min.js")
         script(src="vendor/leafletjs/leaflet.js")
         script(src="vendor/colorbrewer.js")
