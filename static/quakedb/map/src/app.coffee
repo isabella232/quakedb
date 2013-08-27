@@ -3,11 +3,11 @@ if not root.app? then app = root.app = {} else app = root.app
 
 xhr_url = "http://data.usgin.org/arizona/ows?service=WFS&version=1.0.0&request=GetFeature&outputFormat=text/javascript&typeName=azgs:earthquakedata&outputformat=json"
 
+app.dict = []
+
 app.classes = 9
 app.scheme_id = "YlOrRd"
 app.scheme = colorbrewer[app.scheme_id][app.classes]
-
-console.log app.scheme
 
 app.esri_aerial = new L.TileLayer 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 
@@ -16,7 +16,6 @@ app.map = new L.Map 'map',
     zoom: 7
 
 app.map.addLayer app.esri_aerial
-
 
 sidebarControl = L.Control.extend
     options:
@@ -44,17 +43,87 @@ app.bbox_array = [[app.bbox[0],app.bbox[1]],[app.bbox[2],app.bbox[3]]]
 app.svg = d3.select(app.map.getPanes().overlayPane).append 'svg'
 app.g = app.svg.append('g').attr 'class', 'leaflet-zoom-hide'
 
+
+
+
+app.graph_margin = {top:20, right:20, bottom:30, left:40}
+app.graph_width = 450#960 - app.graph_margin.left - app.graph_margin.right
+app.graph_height = 400#500 - app.graph_margin.top - app.graph_margin.bottom
+
+app.graph_x = d3.scale.linear()
+    .range([0, app.graph_width])
+app.graph_y = d3.scale.linear()
+    .range([app.graph_height, 0])
+app.graph_x_axis = d3.svg.axis()
+    .scale(app.graph_x)
+    .orient('bottom')
+app.graph_y_axis = d3.svg.axis()
+    .scale(app.graph_y)
+    .orient('left')
+
+app.graph_svg = d3.select("#sidebar").append("svg")
+    .attr("width", app.graph_width + app.graph_margin.left + app.graph_margin.right)
+    .attr("height", app.graph_height + app.graph_margin.top + app.graph_margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + app.graph_margin.left + "," + app.graph_margin.top + ")")
+
+
+
+
 d3.json xhr_url, (error, collection) ->
+
+
+
+
+    app.graph_x.domain(d3.extent(collection.features, (d) -> return d.properties.calculated_magnitude) ).nice()
+    app.graph_y.domain(d3.extent(collection.features, (d) -> return d.properties.depth )).nice()
+
+    app.graph_svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + app.graph_height + ")")
+        .call(app.graph_x_axis)
+        .style("fill", "white")
+        .append("text")
+        .attr("class", "label")
+        .attr("x", app.graph_width)
+        .attr("y", -6)
+        .style("text-anchor", "end")
+        .text("Magnitude")
+    
+    app.graph_svg.append("g")
+        .attr("class", "y axis")
+        .call(app.graph_y_axis)
+        .style("fill", "white")
+        .append("text")
+        .attr("class", "label")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Depth")
+    
+    app.graph_svg.selectAll(".dot")
+        .data(collection.features)
+        .enter().append("circle")
+        .attr("class", "dot")
+        .attr("r", 3.5)
+        .attr("cx", (d) -> return app.graph_x(d.properties.calculated_magnitude) )
+        .attr("cy", (d) -> return app.graph_y(d.properties.depth) )
+        .style("fill", "white")
+        .style("opacity", 1)
+
+
+
+
+
+
     
     app.scaled_data = []
     collection.features.forEach (d) ->
         app.scaled_data.push(Math.abs(d.properties.calculated_magnitude))
     
-    app.min = d3.min(app.scaled_data)
-    app.max = d3.max(app.scaled_data)
-
-    console.log app.min
-    console.log app.max
+    app.min_mag = d3.min(app.scaled_data)
+    app.max_mag = d3.max(app.scaled_data)
     
     reset = () ->
         app.bottomLeft = project(app.bounds[0])
@@ -101,10 +170,8 @@ d3.json xhr_url, (error, collection) ->
     console.log d3.range(app.classes)
     
     app.scale = d3.scale.linear()
-        .domain([app.min, app.max])
+        .domain([app.min_mag, app.max_mag])
         .range(d3.range(app.classes))
-    
-    console.log app.scale
 
     app.feature = app.g.selectAll('circle')
         .data(collection.features)
@@ -132,10 +199,10 @@ sidebar = (panels) ->
     $.asm.panels = panels
     if panels == 1
         $('#sidebar').animate
-            right:-500
+            right:"-100%"
     else if panels == 2
         $('#sidebar').animate
-            right:0
+            right:"0%"
     $('#sidebar').height($(window).height());
 
 $('.my-custom-control').click () ->
@@ -144,6 +211,11 @@ $('.my-custom-control').click () ->
     else
         return sidebar(1)
 
-$(() ->
+myslide = $(() ->
     $('#data-slider-eq-magnitude').slider
-        range:true )
+        range:true
+        min:0
+        max:8
+        values:[5,7.5]
+        step:0.5
+)
