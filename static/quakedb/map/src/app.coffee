@@ -1,57 +1,25 @@
 root = @
 if not root.app? then app = root.app = {} else app = root.app
 
-xhr_url = "http://data.usgin.org/arizona/ows?service=WFS&version=1.0.0&request=GetFeature&outputFormat=text/javascript&typeName=azgs:earthquakedata&outputformat=json"
-
-app.dict = []
+app.eq_url = "http://data.usgin.org/arizona/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=azgs:earthquakedata&outputformat=json"
+app.seismo_url = "http://data.usgin.org/arizona/azgs/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=azgs:seismostations&outputFormat=json"
+app.esri_aerial = new L.TileLayer 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 
 app.classes = 9
 app.scheme_id = "YlOrRd"
 app.scheme = colorbrewer[app.scheme_id][app.classes]
 
-app.esri_aerial = new L.TileLayer 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-
 app.map = new L.Map 'map',
     center: [33.867990, -111.985034]
     zoom: 7
-
 app.map.addLayer app.esri_aerial
-
-sidebarControl = L.Control.extend
-    options:
-        position: 'topleft'
-    onAdd: (map) ->
-        container = L.DomUtil.create('div','my-custom-control')
-        container.title = 'Show me the money!'
-        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
-                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
-                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
-        $(container).addClass 'glyphicon glyphicon-indent-right'
-        return container
-app.map.addControl(new sidebarControl())
-
-magnitudeControl = L.Control.extend
-    options:
-        position: 'bottomleft'
-    onAdd: (map) ->
-        container = L.DomUtil.create('div', 'eq-magnitude-control')
-        container.innerHTML = '<div class="custom-control-title">Earthquake Magnitude</div>'
-        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
-                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
-                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
-        $(container).append '<div id="data-slider-eq-magnitude"></div>'
-        return container
-app.map.addControl(new magnitudeControl())
 
 app.bbox_string = app.map.getBounds().toBBoxString()
 app.bbox = app.bbox_string.split(',')
 app.bbox_array = [[app.bbox[0],app.bbox[1]],[app.bbox[2],app.bbox[3]]]
 
-app.svg = d3.select(app.map.getPanes().overlayPane).append 'svg'
-app.g = app.svg.append('g').attr 'class', 'leaflet-zoom-hide'
-
-
-
+app.map.svg = d3.select(app.map.getPanes().overlayPane).append 'svg'
+app.map.g = app.map.svg.append('g').attr 'class', 'leaflet-zoom-hide'
 
 app.graph_margin = {top:20, right:20, bottom:30, left:40}
 app.graph_width = 475#960 - app.graph_margin.left - app.graph_margin.right
@@ -74,136 +42,57 @@ app.graph_svg = d3.select("#sidebar").append("svg")
     .append("g")
     .attr("transform", "translate(" + app.graph_margin.left + "," + app.graph_margin.top + ")")
 
+sidebarControl = L.Control.extend
+    options:
+        position: 'topleft'
+    onAdd: (map) ->
+        container = L.DomUtil.create('div','my-custom-control')
+        container.title = 'Show me the money!'
+        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
+                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
+                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
+        $(container).addClass 'glyphicon glyphicon-indent-right'
+        return container
+app.map.addControl new sidebarControl
 
-d3.json xhr_url, (error, collection) ->
+magnitudeStyleControl = L.Control.extend
+    options:
+        position: 'topleft'
+    onAdd: (map) ->
+        container = L.DomUtil.create('div','magnitude-style-control')
+        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
+                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
+                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
+        $(container).append '<div id="blow-up-magnitude"></div>'
+        return container
+app.map.addControl new magnitudeStyleControl
 
+magnitudeControl = L.Control.extend
+    options:
+        position: 'bottomleft'
+    onAdd: (map) ->
+        container = L.DomUtil.create('div', 'eq-magnitude-control')
+        container.innerHTML = '<div class="custom-control-title">Earthquake Magnitude</div>'
+        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
+                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
+                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
+        $(container).append '<div id="data-slider-eq-magnitude"></div>'
+        return container
+app.map.addControl new magnitudeControl
 
-    app.graph_x.domain(d3.extent(collection.features, (d) -> return d.properties.calculated_magnitude) ).nice()
-    app.graph_y.domain(d3.extent(collection.features, (d) -> return d.properties.depth )).nice()
+dateControl = L.Control.extend
+    options:
+        position: 'bottomleft'
+    onAdd: (map) ->
+        container = L.DomUtil.create('div', 'date-control')
+        container.innerHTML = '<div class="custom-control-title">Date Filter</div>'
+        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
+                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
+                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
+        $(container).append '<div id="data-slider-date"></div>'
+        return container
+app.map.addControl new dateControl
 
-    app.graph_svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + app.graph_height + ")")
-        .call(app.graph_x_axis)
-        .style("fill", "white")
-        .append("text")
-        .attr("class", "label")
-        .attr("x", app.graph_width)
-        .attr("y", -6)
-        .style("text-anchor", "end")
-        .text("Magnitude")
-    
-    app.graph_svg.append("g")
-        .attr("class", "y axis")
-        .call(app.graph_y_axis)
-        .style("fill", "white")
-        .append("text")
-        .attr("class", "label")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text("Depth")
-    
-    app.graph_svg.selectAll(".dot")
-        .data(collection.features)
-        .enter().append("circle")
-        .attr("class", "dot")
-        .attr("r", 3.5)
-        .attr("cx", (d) -> return app.graph_x(d.properties.calculated_magnitude) )
-        .attr("cy", (d) -> return app.graph_y(d.properties.depth) )
-        .attr("mag", (d) -> return d.properties.calculated_magnitude)
-        .style("fill", "white")
-        .style("opacity", 1)
-
-
-
-
-
-
-    
-    app.scaled_data = []
-    collection.features.forEach (d) ->
-        app.scaled_data.push(Math.abs(d.properties.calculated_magnitude))
-    
-    app.min_mag = d3.min(app.scaled_data)
-    app.max_mag = d3.max(app.scaled_data)
-    
-    app.reset = () ->
-        app.bottomLeft = project(app.bounds[0])
-        app.topRight = project(app.bounds[1])
-    
-        app.svg.attr('width', app.topRight[0] - app.bottomLeft[0])
-               .attr('height', app.bottomLeft[1] - app.topRight[1])
-               .style('margin-left', app.bottomLeft[0] + 'px')
-               .style('margin-top', app.topRight[1] + 'px')
-    
-        app.g.attr('transform', 'translate(' + -app.bottomLeft[0] + ',' + -app.topRight[1] + ')')
-
-        app.feature.attr("cx",(d) -> return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )
-                   .attr("cy",(d) -> return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )
-                   .attr("r", (d) -> d.properties.calculated_magnitude*4)
-
-        app.feature.attr 'd', app.path
-
-    project = (x) ->
-        app.point = app.map.latLngToLayerPoint(new L.LatLng(x[1], x[0]))
-        return [app.point.x, app.point.y]
-
-    setInterval = () ->
-        d3.select(@)
-            .style('stroke-width', 3)
-            .style('stroke', app.scheme[app.classes - 1])
-            .transition()
-            .ease("linear-in")
-            .duration(1)
-            .attr("r", 20)
-            
-    outInterval = () ->
-        d3.select(@)
-            .style('stroke-width', 1)
-            .style('stroke', app.scheme[app.classes - 1])
-            .transition()
-            .ease('linear-out')
-            .duration(1)
-            .attr("r", 5)
-
-    app.bounds = app.bbox_array
-    app.path = d3.geo.path().projection project
-
-    console.log d3.range(app.classes)
-    
-    app.scale = d3.scale.linear()
-        .domain([app.min_mag, app.max_mag])
-        .range(d3.range(app.classes))
-
-    app.feature = app.g.selectAll('circle')
-        .data(collection.features)
-        .enter().append('svg:circle')
-        .attr('cx', (d) -> project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )
-        .attr('cy', (d) -> project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )
-        .style('fill', (d) -> app.scheme[(app.scale(d.properties.calculated_magnitude) * 8).toFixed()])
-        .style('stroke', app.scheme[app.classes - 1])
-        .style('opacity', 0.5)
-        .attr('r', (d) -> d.properties.calculated_magnitude*4)
-#        .on('mouseover', setInterval)
-#        .on('mouseout', outInterval)
-        
-    app.map.on 'viewreset', app.reset
-    app.reset()
-    
-    get_mag = (d) -> return d.properties.calculated_magnitude
-    
-    app.filter = (min,max) ->
-        minv = min
-        maxv = max
-        d3.selectAll("circle").classed("selected", (d) -> return maxv >= get_mag(d) && get_mag(d) >= minv)
-        selected = d3.selectAll(".selected")
-        d3.selectAll("circle").style("display", "none")
-        selected.style("display", "block")
-    
-    
-    
 $.asm = {};
 $.asm.panels = 1;
 
@@ -224,16 +113,3 @@ $('.my-custom-control').click () ->
     else
         app.map.panTo(new L.LatLng(33.867990, -111.985034));
         return sidebar(1)
-
-myslide = $(() ->
-    $('#data-slider-eq-magnitude').slider
-        range:true
-        min:0
-        max:8
-        values:[4.5, 7.5]
-        step:0.5
-        slide: (event, ui) ->
-            minv = ui.values[0]
-            maxv = ui.values[1]
-            app.filter(minv,maxv)
-)
