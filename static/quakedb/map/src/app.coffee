@@ -23,6 +23,9 @@ sidebarControl = L.Control.extend
     onAdd: (map) ->
         container = L.DomUtil.create('div','my-custom-control')
         container.title = 'Show me the money!'
+        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
+                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
+                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
         $(container).addClass 'glyphicon glyphicon-indent-right'
         return container
 app.map.addControl(new sidebarControl())
@@ -32,6 +35,10 @@ magnitudeControl = L.Control.extend
         position: 'bottomleft'
     onAdd: (map) ->
         container = L.DomUtil.create('div', 'eq-magnitude-control')
+        container.innerHTML = '<div class="custom-control-title">Earthquake Magnitude</div>'
+        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
+                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
+                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
         $(container).append '<div id="data-slider-eq-magnitude"></div>'
         return container
 app.map.addControl(new magnitudeControl())
@@ -47,7 +54,7 @@ app.g = app.svg.append('g').attr 'class', 'leaflet-zoom-hide'
 
 
 app.graph_margin = {top:20, right:20, bottom:30, left:40}
-app.graph_width = 450#960 - app.graph_margin.left - app.graph_margin.right
+app.graph_width = 475#960 - app.graph_margin.left - app.graph_margin.right
 app.graph_height = 400#500 - app.graph_margin.top - app.graph_margin.bottom
 
 app.graph_x = d3.scale.linear()
@@ -68,11 +75,7 @@ app.graph_svg = d3.select("#sidebar").append("svg")
     .attr("transform", "translate(" + app.graph_margin.left + "," + app.graph_margin.top + ")")
 
 
-
-
 d3.json xhr_url, (error, collection) ->
-
-
 
 
     app.graph_x.domain(d3.extent(collection.features, (d) -> return d.properties.calculated_magnitude) ).nice()
@@ -109,6 +112,7 @@ d3.json xhr_url, (error, collection) ->
         .attr("r", 3.5)
         .attr("cx", (d) -> return app.graph_x(d.properties.calculated_magnitude) )
         .attr("cy", (d) -> return app.graph_y(d.properties.depth) )
+        .attr("mag", (d) -> return d.properties.calculated_magnitude)
         .style("fill", "white")
         .style("opacity", 1)
 
@@ -125,7 +129,7 @@ d3.json xhr_url, (error, collection) ->
     app.min_mag = d3.min(app.scaled_data)
     app.max_mag = d3.max(app.scaled_data)
     
-    reset = () ->
+    app.reset = () ->
         app.bottomLeft = project(app.bounds[0])
         app.topRight = project(app.bounds[1])
     
@@ -138,7 +142,7 @@ d3.json xhr_url, (error, collection) ->
 
         app.feature.attr("cx",(d) -> return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )
                    .attr("cy",(d) -> return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )
-#                   .attr("r",  (d) -> d.properties.calculated_magnitude*4)
+                   .attr("r", (d) -> d.properties.calculated_magnitude*4)
 
         app.feature.attr 'd', app.path
 
@@ -178,17 +182,25 @@ d3.json xhr_url, (error, collection) ->
         .enter().append('svg:circle')
         .attr('cx', (d) -> project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )
         .attr('cy', (d) -> project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )
-        .attr('r', 5)
         .style('fill', (d) -> app.scheme[(app.scale(d.properties.calculated_magnitude) * 8).toFixed()])
         .style('stroke', app.scheme[app.classes - 1])
-#        .attr('r', (d) -> d.properties.calculated_magnitude*4)
-        .on('mouseover', setInterval)
-        .on('mouseout', outInterval)
+        .style('opacity', 0.5)
+        .attr('r', (d) -> d.properties.calculated_magnitude*4)
+#        .on('mouseover', setInterval)
+#        .on('mouseout', outInterval)
         
-    app.map.on 'viewreset', reset
-    reset()
-
-
+    app.map.on 'viewreset', app.reset
+    app.reset()
+    
+    get_mag = (d) -> return d.properties.calculated_magnitude
+    
+    app.filter = (min,max) ->
+        minv = min
+        maxv = max
+        d3.selectAll("circle").classed("selected", (d) -> return maxv >= get_mag(d) && get_mag(d) >= minv)
+        selected = d3.selectAll(".selected")
+        d3.selectAll("circle").style("display", "none")
+        selected.style("display", "block")
     
     
     
@@ -207,8 +219,10 @@ sidebar = (panels) ->
 
 $('.my-custom-control').click () ->
     if $.asm.panels == 1
+        app.map.panTo(new L.LatLng(33.867990, -108.985034));
         return sidebar(2)
     else
+        app.map.panTo(new L.LatLng(33.867990, -111.985034));
         return sidebar(1)
 
 myslide = $(() ->
@@ -216,6 +230,10 @@ myslide = $(() ->
         range:true
         min:0
         max:8
-        values:[5,7.5]
+        values:[4.5, 7.5]
         step:0.5
+        slide: (event, ui) ->
+            minv = ui.values[0]
+            maxv = ui.values[1]
+            app.filter(minv,maxv)
 )

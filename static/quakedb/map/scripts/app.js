@@ -37,6 +37,7 @@
       var container;
       container = L.DomUtil.create('div', 'my-custom-control');
       container.title = 'Show me the money!';
+      L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation).on(container, 'dblclick', L.DomEvent.stopPropagation).on(container, 'mousedown', L.DomEvent.stopPropagation);
       $(container).addClass('glyphicon glyphicon-indent-right');
       return container;
     }
@@ -51,6 +52,8 @@
     onAdd: function(map) {
       var container;
       container = L.DomUtil.create('div', 'eq-magnitude-control');
+      container.innerHTML = '<div class="custom-control-title">Earthquake Magnitude</div>';
+      L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation).on(container, 'dblclick', L.DomEvent.stopPropagation).on(container, 'mousedown', L.DomEvent.stopPropagation);
       $(container).append('<div id="data-slider-eq-magnitude"></div>');
       return container;
     }
@@ -75,7 +78,7 @@
     left: 40
   };
 
-  app.graph_width = 450;
+  app.graph_width = 475;
 
   app.graph_height = 400;
 
@@ -90,7 +93,7 @@
   app.graph_svg = d3.select("#sidebar").append("svg").attr("width", app.graph_width + app.graph_margin.left + app.graph_margin.right).attr("height", app.graph_height + app.graph_margin.top + app.graph_margin.bottom).append("g").attr("transform", "translate(" + app.graph_margin.left + "," + app.graph_margin.top + ")");
 
   d3.json(xhr_url, function(error, collection) {
-    var outInterval, project, reset, setInterval;
+    var get_mag, outInterval, project, setInterval;
     app.graph_x.domain(d3.extent(collection.features, function(d) {
       return d.properties.calculated_magnitude;
     })).nice();
@@ -103,6 +106,8 @@
       return app.graph_x(d.properties.calculated_magnitude);
     }).attr("cy", function(d) {
       return app.graph_y(d.properties.depth);
+    }).attr("mag", function(d) {
+      return d.properties.calculated_magnitude;
     }).style("fill", "white").style("opacity", 1);
     app.scaled_data = [];
     collection.features.forEach(function(d) {
@@ -110,7 +115,7 @@
     });
     app.min_mag = d3.min(app.scaled_data);
     app.max_mag = d3.max(app.scaled_data);
-    reset = function() {
+    app.reset = function() {
       app.bottomLeft = project(app.bounds[0]);
       app.topRight = project(app.bounds[1]);
       app.svg.attr('width', app.topRight[0] - app.bottomLeft[0]).attr('height', app.bottomLeft[1] - app.topRight[1]).style('margin-left', app.bottomLeft[0] + 'px').style('margin-top', app.topRight[1] + 'px');
@@ -119,6 +124,8 @@
         return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
       }).attr("cy", function(d) {
         return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
+      }).attr("r", function(d) {
+        return d.properties.calculated_magnitude * 4;
       });
       return app.feature.attr('d', app.path);
     };
@@ -140,11 +147,27 @@
       return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0];
     }).attr('cy', function(d) {
       return project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1];
-    }).attr('r', 5).style('fill', function(d) {
+    }).style('fill', function(d) {
       return app.scheme[(app.scale(d.properties.calculated_magnitude) * 8).toFixed()];
-    }).style('stroke', app.scheme[app.classes - 1]).on('mouseover', setInterval).on('mouseout', outInterval);
-    app.map.on('viewreset', reset);
-    return reset();
+    }).style('stroke', app.scheme[app.classes - 1]).style('opacity', 0.5).attr('r', function(d) {
+      return d.properties.calculated_magnitude * 4;
+    });
+    app.map.on('viewreset', app.reset);
+    app.reset();
+    get_mag = function(d) {
+      return d.properties.calculated_magnitude;
+    };
+    return app.filter = function(min, max) {
+      var maxv, minv, selected;
+      minv = min;
+      maxv = max;
+      d3.selectAll("circle").classed("selected", function(d) {
+        return maxv >= get_mag(d) && get_mag(d) >= minv;
+      });
+      selected = d3.selectAll(".selected");
+      d3.selectAll("circle").style("display", "none");
+      return selected.style("display", "block");
+    };
   });
 
   $.asm = {};
@@ -167,8 +190,10 @@
 
   $('.my-custom-control').click(function() {
     if ($.asm.panels === 1) {
+      app.map.panTo(new L.LatLng(33.867990, -108.985034));
       return sidebar(2);
     } else {
+      app.map.panTo(new L.LatLng(33.867990, -111.985034));
       return sidebar(1);
     }
   });
@@ -178,8 +203,14 @@
       range: true,
       min: 0,
       max: 8,
-      values: [5, 7.5],
-      step: 0.5
+      values: [4.5, 7.5],
+      step: 0.5,
+      slide: function(event, ui) {
+        var maxv, minv;
+        minv = ui.values[0];
+        maxv = ui.values[1];
+        return app.filter(minv, maxv);
+      }
     });
   });
 
