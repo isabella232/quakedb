@@ -1,9 +1,8 @@
 root = @
 if not root.app? then app = root.app = {} else app = root.app
 
-
-d3.json app.seismo_url, (error, collection) ->
-    app.drawseismo(collection)
+#d3.json app.seismo_url, (error, collection) ->
+#    app.drawseismo(collection)
 
 d3.json app.eq_url, (error, collection) ->
 

@@ -6,6 +6,17 @@ app.drawgraph = (collection) ->
     app.graph_x.domain(d3.extent(collection.features, (d) -> return d.properties.calculated_magnitude) ).nice()
     app.graph_y.domain(d3.extent(collection.features, (d) -> return d.properties.depth )).nice()
 
+    app.scaled_data = []
+    collection.features.forEach (d) ->
+        app.scaled_data.push(Math.abs(d.properties.calculated_magnitude))
+
+    app.min_mag = d3.min(app.scaled_data)
+    app.max_mag = d3.max(app.scaled_data)
+
+    app.scale = d3.scale.linear()
+        .domain([app.min_mag, app.max_mag])
+        .range(d3.range(app.classes))
+
     app.graph_svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + app.graph_height + ")")
@@ -38,5 +49,6 @@ app.drawgraph = (collection) ->
         .attr("cx", (d) -> return app.graph_x(d.properties.calculated_magnitude) )
         .attr("cy", (d) -> return app.graph_y(d.properties.depth) )
         .attr("mag", (d) -> return d.properties.calculated_magnitude)
-        .style("fill", "white")
+        .style('fill', (d) -> app.scheme[(app.scale(d.properties.calculated_magnitude) * 8).toFixed()])
+        .style('stroke', app.scheme[app.classes - 1])
         .style("opacity", 1)

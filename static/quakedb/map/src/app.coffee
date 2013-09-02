@@ -67,6 +67,18 @@ magnitudeStyleControl = L.Control.extend
         return container
 app.map.addControl new magnitudeStyleControl
 
+helpControl = L.Control.extend
+    options:
+        position: 'topleft'
+    onAdd: (map) ->
+        container = L.DomUtil.create('div', 'help-control')
+        L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation)
+                  .on(container, 'dblclick', L.DomEvent.stopPropagation)
+                  .on(container, 'mousedown', L.DomEvent.stopPropagation)
+        $(container).addClass 'glyphicon glyphicon-question-sign'
+        return container
+app.map.addControl new helpControl
+
 magnitudeControl = L.Control.extend
     options:
         position: 'bottomleft'
@@ -92,6 +104,9 @@ dateControl = L.Control.extend
         $(container).append '<div id="data-slider-date"></div>'
         return container
 app.map.addControl new dateControl
+
+app.mag_svg = d3.select("#blow-up-magnitude").append('svg')
+app.mag_g = app.mag_svg.append('g')
 
 $.asm = {};
 $.asm.panels = 1;
