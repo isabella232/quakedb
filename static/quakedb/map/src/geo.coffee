@@ -187,7 +187,7 @@ app.drawmap = (collection) ->
         selected = d3.selectAll(".selected")
         d3.selectAll("circle").style("display", "none")
         selected.style("display", "block")
-'''
+
 app.drawseismo = (collection) ->
     app.project = (x) ->
         app.point = app.map.latLngToLayerPoint(new L.LatLng(x[1], x[0]))
@@ -195,11 +195,11 @@ app.drawseismo = (collection) ->
     
     app.path = d3.geo.path().projection app.project
     
-    app.feature = app.g.selectAll('path')
+    app.feature = app.map.g.selectAll('path')
         .data(collection.features)
         .enter().append('path')
-#        .attr('cx', (d) -> app.project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )
-#        .attr('cy', (d) -> app.project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )
-        .attr('d', app.path)
-#        .style('fill', 'black')
-'''
+        .attr('transform', (d) -> 'translate(' + (app.project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0]) + ',' + (app.project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1]) + ')')
+        .attr('d', d3.svg.symbol().type('diamond').size(75))
+        .style('stroke', 'purple')
+        .style('stroke-width', 2)
+        .style('fill-opacity', 0)

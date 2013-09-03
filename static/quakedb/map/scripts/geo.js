@@ -152,6 +152,15 @@
     };
   };
 
-  'app.drawseismo = (collection) ->\n    app.project = (x) ->\n        app.point = app.map.latLngToLayerPoint(new L.LatLng(x[1], x[0]))\n        return [app.point.x, app.point.y]\n    \n    app.path = d3.geo.path().projection app.project\n    \n    app.feature = app.g.selectAll(\'path\')\n        .data(collection.features)\n        .enter().append(\'path\')\n#        .attr(\'cx\', (d) -> app.project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0] )\n#        .attr(\'cy\', (d) -> app.project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1] )\n        .attr(\'d\', app.path)\n#        .style(\'fill\', \'black\')';
+  app.drawseismo = function(collection) {
+    app.project = function(x) {
+      app.point = app.map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+      return [app.point.x, app.point.y];
+    };
+    app.path = d3.geo.path().projection(app.project);
+    return app.feature = app.map.g.selectAll('path').data(collection.features).enter().append('path').attr('transform', function(d) {
+      return 'translate(' + (app.project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[0]) + ',' + (app.project([d.geometry.coordinates[0], d.geometry.coordinates[1]])[1]) + ')';
+    }).attr('d', d3.svg.symbol().type('diamond').size(75)).style('stroke', 'purple').style('stroke-width', 2).style('fill-opacity', 0);
+  };
 
 }).call(this);

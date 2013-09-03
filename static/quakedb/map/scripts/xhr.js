@@ -10,6 +10,10 @@
     app = root.app;
   }
 
+  d3.json(app.seismo_url, function(error, collection) {
+    return app.drawseismo(collection);
+  });
+
   d3.json(app.eq_url, function(error, collection) {
     var date_slider, eq_magnitude_slider;
     app.drawgraph(collection);
