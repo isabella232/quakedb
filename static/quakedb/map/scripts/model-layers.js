@@ -80,9 +80,9 @@
             var feature, magnitude;
             feature = this;
             magnitude = feature.get('calculated_magnitude');
-            return Math.abs((magnitude + 1) * 6);
+            return Math.abs((magnitude + 1) * 7);
           });
-          ol.expr.register('drawColor', function() {
+          ol.expr.register('drawFill', function() {
             var feature, magnitude;
             feature = this;
             magnitude = feature.get('calculated_magnitude');

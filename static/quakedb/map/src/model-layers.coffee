@@ -38,9 +38,9 @@ class app.models.GeoJSONLayer extends app.models.LayerModel
 				ol.expr.register 'drawMagSize', () ->
 				    feature = @
 				    magnitude = feature.get 'calculated_magnitude'
-				    Math.abs (magnitude+1)*6
+				    Math.abs (magnitude+1)*7
 
-				ol.expr.register 'drawColor', () ->
+				ol.expr.register 'drawFill', () ->
 				    feature = @
 				    magnitude = feature.get 'calculated_magnitude'
 				    app.colors[(scale(magnitude)*8).toFixed()]

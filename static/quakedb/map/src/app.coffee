@@ -1,10 +1,12 @@
 root = @
 if not root.app? then app = root.app = {} else app = root.app
 
-app.center = ol.proj.transform [-112.085034, 33.857990], 'EPSG:4326', 'EPSG:3857'
+app.center = ol.proj.transform [-108.81034, 33.857990], 'EPSG:4326', 'EPSG:3857'
 
 app.osm_layer = new ol.layer.Tile
-    source: new ol.source.MapQuestOpenAerial()
+    source: new ol.source.XYZ
+        url: 'http://server.arcgisonline.com/ArcGIS/rest/services/' + 
+            'World_Imagery/MapServer/tile/{z}/{y}/{x}'
 
 ol.expr.register 'resolution', ->
     app.map.getView().getView2D().getResolution()
@@ -13,7 +15,49 @@ app.view = new ol.View2D
     center: app.center
     zoom: 7
 
+$.side = {}
+$.side.bar = 2
+
+app.sidebar = (panels) ->
+    $.side.bar = panels
+    if panels == 1
+        $('#sidebar').animate
+            right: '-100%'
+    else if panels == 2
+        $('#sidebar').animate
+            right: '0%'
+
+app.sidebarControl = (options) -> 
+  options = options || {}
+
+  anchor = document.createElement('a')
+  anchor.href = '#sidebar-control'
+  anchor.className = 'glyphicon glyphicon-indent-right'
+  
+  handleRotateNorth = (e) -> 
+    e.preventDefault()
+    if $.side.bar == 2
+        return app.sidebar(1)
+    else
+        return app.sidebar(2)
+
+  anchor.addEventListener 'click', handleRotateNorth, false
+
+  element = document.createElement 'div'
+  element.className = 'sidebar-control ol-unselectable'
+  element.appendChild anchor
+
+  ol.control.Control.call(@, {
+    element: element,
+    target: options.target
+  });
+
+ol.inherits(app.sidebarControl, ol.control.Control);
+
 app.map = new ol.Map
+    controls: ol.control.defaults().extend([
+        new app.sidebarControl()
+    ])
     target: 'map'
     layers: [app.osm_layer]
     renderer: ol.RendererHint.CANVAS
@@ -36,11 +80,8 @@ app.dataLayers = [
                 new ol.style.Shape
                     size: ol.expr.parse 'drawMagSize()'
                     fill: new ol.style.Fill
-                        color: ol.expr.parse 'drawColor()'
+                        color: ol.expr.parse 'drawFill()'
                         opacity: 0.7
-                    stroke: new ol.style.Stroke
-                        color: '#ff9900'
-                        opacity: 1
             ]
 ]
 
