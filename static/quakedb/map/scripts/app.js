@@ -27,51 +27,7 @@
     zoom: 7
   });
 
-  $.side = {};
-
-  $.side.bar = 2;
-
-  app.sidebar = function(panels) {
-    $.side.bar = panels;
-    if (panels === 1) {
-      return $('#sidebar').animate({
-        right: '-100%'
-      });
-    } else if (panels === 2) {
-      return $('#sidebar').animate({
-        right: '0%'
-      });
-    }
-  };
-
-  app.sidebarControl = function(options) {
-    var anchor, element, handleRotateNorth;
-    options = options || {};
-    anchor = document.createElement('a');
-    anchor.href = '#sidebar-control';
-    anchor.className = 'glyphicon glyphicon-indent-right';
-    handleRotateNorth = function(e) {
-      e.preventDefault();
-      if ($.side.bar === 2) {
-        return app.sidebar(1);
-      } else {
-        return app.sidebar(2);
-      }
-    };
-    anchor.addEventListener('click', handleRotateNorth, false);
-    element = document.createElement('div');
-    element.className = 'sidebar-control ol-unselectable';
-    element.appendChild(anchor);
-    return ol.control.Control.call(this, {
-      element: element,
-      target: options.target
-    });
-  };
-
-  ol.inherits(app.sidebarControl, ol.control.Control);
-
   app.map = new ol.Map({
-    controls: ol.control.defaults().extend([new app.sidebarControl()]),
     target: 'map',
     layers: [app.osm_layer],
     renderer: ol.RendererHint.CANVAS,
@@ -106,7 +62,17 @@
     })
   ];
 
+  app.mapControls = [
+    new app.models.ControlModel({
+      href: '#sidebar-control',
+      class_disp: 'glyphicon glyphicon-indent-right',
+      class_ol: 'sidebar-control ol-unselectable'
+    })
+  ];
+
   app.dataLayerCollection = new app.models.LayerCollection(app.dataLayers);
+
+  app.mapControlCollection = new app.models.ControlCollection(app.mapControls);
 
   app.layers = new app.views.LayerView({
     collection: app.dataLayerCollection

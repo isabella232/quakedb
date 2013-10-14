@@ -15,49 +15,7 @@ app.view = new ol.View2D
     center: app.center
     zoom: 7
 
-$.side = {}
-$.side.bar = 2
-
-app.sidebar = (panels) ->
-    $.side.bar = panels
-    if panels == 1
-        $('#sidebar').animate
-            right: '-100%'
-    else if panels == 2
-        $('#sidebar').animate
-            right: '0%'
-
-app.sidebarControl = (options) -> 
-  options = options || {}
-
-  anchor = document.createElement('a')
-  anchor.href = '#sidebar-control'
-  anchor.className = 'glyphicon glyphicon-indent-right'
-  
-  handleRotateNorth = (e) -> 
-    e.preventDefault()
-    if $.side.bar == 2
-        return app.sidebar(1)
-    else
-        return app.sidebar(2)
-
-  anchor.addEventListener 'click', handleRotateNorth, false
-
-  element = document.createElement 'div'
-  element.className = 'sidebar-control ol-unselectable'
-  element.appendChild anchor
-
-  ol.control.Control.call(@, {
-    element: element,
-    target: options.target
-  });
-
-ol.inherits(app.sidebarControl, ol.control.Control);
-
 app.map = new ol.Map
-    controls: ol.control.defaults().extend([
-        new app.sidebarControl()
-    ])
     target: 'map'
     layers: [app.osm_layer]
     renderer: ol.RendererHint.CANVAS
@@ -85,7 +43,15 @@ app.dataLayers = [
             ]
 ]
 
+app.mapControls = [
+    new app.models.ControlModel
+        href:'#sidebar-control'
+        class_disp:'glyphicon glyphicon-indent-right'
+        class_ol:'sidebar-control ol-unselectable'
+]
+
 app.dataLayerCollection = new app.models.LayerCollection app.dataLayers
+app.mapControlCollection = new app.models.ControlCollection app.mapControls
 
 app.layers = new app.views.LayerView
     collection: app.dataLayerCollection
