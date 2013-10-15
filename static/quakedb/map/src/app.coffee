@@ -21,6 +21,8 @@ app.map = new ol.Map
     renderer: ol.RendererHint.CANVAS
     view: app.view
 
+map = app.map
+
 app.graph_margin = {top:20, right:20, bottom:30, left:40}
 app.graph_width = 500
 app.graph_height = 400
@@ -85,3 +87,11 @@ app.graphCollection = new app.models.GraphCollection app.graphs
 app.layers = new app.views.LayerView
     collection: app.dataLayerCollection
 app.layers.render()
+
+map.on ['click'], (evt) ->
+    map.getFeatures
+        pixel: evt.getPixel()
+        layers: [app.dataLayerCollection.models[0].attributes.layer]
+        success: (feature) -> 
+            features = feature[0]
+            console.log features[0].getId(), features[0].get 'calculated_magnitude'
