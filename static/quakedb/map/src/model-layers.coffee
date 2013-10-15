@@ -28,9 +28,10 @@ class app.models.GeoJSONLayer extends app.models.LayerModel
 			thisModel = @
 
 			app.data[callback] = (data) ->
+				app.thisData = data
 				thisData = []
 				data.features.forEach (q) ->
-					thisData.push Math.abs(q.properties.calculated_magnitude)
+					thisData.push Math.abs q.properties.calculated_magnitude
 				min = Math.min.apply null,thisData
 				max = Math.max.apply null,thisData
 				scale = d3.scale.linear().domain([min,max]).range(d3.range(app.classes))
@@ -46,6 +47,7 @@ class app.models.GeoJSONLayer extends app.models.LayerModel
 				    app.colors[(scale(magnitude)*8).toFixed()]
 
 				layer = new ol.layer.Vector
+					id: options.id
 					source: new ol.source.Vector
 						parser: new ol.parser.GeoJSON()
 						data: data

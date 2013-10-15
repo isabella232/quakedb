@@ -69,6 +69,7 @@
         thisModel = this;
         app.data[callback] = function(data) {
           var layer, max, min, scale, thisData;
+          app.thisData = data;
           thisData = [];
           data.features.forEach(function(q) {
             return thisData.push(Math.abs(q.properties.calculated_magnitude));
@@ -89,6 +90,7 @@
             return app.colors[(scale(magnitude) * 8).toFixed()];
           });
           layer = new ol.layer.Vector({
+            id: options.id,
             source: new ol.source.Vector({
               parser: new ol.parser.GeoJSON(),
               data: data
