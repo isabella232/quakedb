@@ -41,7 +41,7 @@
     height:100%;
 }
 
-#sidebar svg {
+#graph svg {
     background-color: rgba(255,255,255,0.5);
     background-position: 50% 50%;
     background-repeat: no-repeat;
@@ -54,6 +54,19 @@
     box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
 }
 
+#chart {
+	margin-top: 10px;
+}
+
+#chart .panel {
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    display: block;
+    margin: 0 auto;
+    padding: 3px;
+    width: 566px;
+}
+
 .axis path,
 .axis line {
     fill:none;
@@ -64,6 +77,6 @@
   stroke: #000;
 }
 
-#sidebar svg .domain {
+#graph svg .domain {
     stroke: white;
 }

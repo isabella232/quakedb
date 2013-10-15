@@ -38,7 +38,7 @@ app.graph_y_axis = d3.svg.axis()
     .scale(app.graph_y)
     .orient('left')
 
-app.graph_svg = d3.select('#sidebar').append('svg')
+app.graph_svg = d3.select('#graph').append('svg')
     .attr('width', app.graph_width + app.graph_margin.left + app.graph_margin.right)
     .attr('height', app.graph_height + app.graph_margin.top + app.graph_margin.bottom)
     .append('g')
