@@ -10,15 +10,23 @@
   </head>
   <body>
     <div id="map" class="col-md-12"></div>
-    <div id="sidebar">
+    <div id="sidebar"><img src="ABSN_logo2.png">
       <div id="graph"></div>
-      <div id="chart">
-        <div class="panel panel-default">
-          <div class="panel-heading"></div>
-          <div class="table"></div>
+      <div id="chart"></div>
+    </div>
+    <script id="table" type="text/html">
+      <div class="panel panel-success">
+        <div class="panel-heading">Attribute Data
+          <table>
+            <thead>
+              <tr>
+                <th><%= data %></th>
+              </tr>
+            </thead>
+          </table>
         </div>
       </div>
-    </div>
+    </script>
     <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
     <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
     <script src="vendor/bootstrap-3.0.0/dist/js/bootstrap.min.js"></script>
@@ -32,6 +40,8 @@
     <script src="scripts/model-layers.js"></script>
     <script src="scripts/view-layers.js"></script>
     <script src="scripts/model-graph.js"></script>
+    <script src="scripts/model-table.js"></script>
+    <script src="scripts/view-table.js"></script>
     <script src="scripts/app.js"></script>
   </body>
 </html>

@@ -41,6 +41,16 @@
     height:100%;
 }
 
+#sidebar img {
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    display: block;
+    margin: 0 auto;
+    padding: 3px;
+    height: 180px;
+    width: 580px;
+}
+
 #graph svg {
     background-color: rgba(255,255,255,0.5);
     background-position: 50% 50%;

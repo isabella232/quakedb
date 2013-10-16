@@ -88,10 +88,5 @@ app.layers = new app.views.LayerView
     collection: app.dataLayerCollection
 app.layers.render()
 
-map.on ['click'], (evt) ->
-    map.getFeatures
-        pixel: evt.getPixel()
-        layers: [app.dataLayerCollection.models[0].attributes.layer]
-        success: (feature) -> 
-            features = feature[0]
-            console.log features[0].getId(), features[0].get 'calculated_magnitude'
+app.table = new app.views.TableView
+app.table.render()

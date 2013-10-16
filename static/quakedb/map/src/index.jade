@@ -10,11 +10,17 @@ html(lang="en")
 	body
 		#map.col-md-12
 		#sidebar
+			img(src="ABSN_logo2.png")
 			#graph
 			#chart
-				.panel.panel-default
-					.panel-heading
-					.table
+
+		script#table(type="text/html")
+			.panel.panel-success
+				.panel-heading Attribute Data
+					table
+						thead
+							tr
+								th <%= data %>
 		script(src="http://code.jquery.com/jquery-1.9.1.js")
 		script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
 		script(src="vendor/bootstrap-3.0.0/dist/js/bootstrap.min.js")
@@ -28,4 +34,6 @@ html(lang="en")
 		script(src="scripts/model-layers.js")
 		script(src="scripts/view-layers.js")
 		script(src="scripts/model-graph.js")
+		script(src="scripts/model-table.js")
+		script(src="scripts/view-table.js")
 		script(src="scripts/app.js")

@@ -112,16 +112,8 @@
 
   app.layers.render();
 
-  map.on(['click'], function(evt) {
-    return map.getFeatures({
-      pixel: evt.getPixel(),
-      layers: [app.dataLayerCollection.models[0].attributes.layer],
-      success: function(feature) {
-        var features;
-        features = feature[0];
-        return console.log(features[0].getId(), features[0].get('calculated_magnitude'));
-      }
-    });
-  });
+  app.table = new app.views.TableView;
+
+  app.table.render();
 
 }).call(this);
