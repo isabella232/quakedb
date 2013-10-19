@@ -27,6 +27,8 @@
     zoom: 7
   });
 
+  app.drawing = 'inactive';
+
   app.map = new ol.Map({
     target: 'map',
     layers: [app.osm_layer],
@@ -87,9 +89,15 @@
 
   app.mapControls = [
     new app.models.ControlModel({
+      id: 'sidebar',
       href: '#sidebar-control',
       class_disp: 'glyphicon glyphicon-indent-right',
       class_ol: 'sidebar-control ol-unselectable'
+    }), new app.models.ControlModel({
+      id: 'draw',
+      href: '#draw-control',
+      class_disp: 'glyphicon glyphicon-pencil',
+      class_ol: 'draw-control ol-unselectable'
     })
   ];
 

@@ -15,7 +15,17 @@ app.view = new ol.View2D
     center: app.center
     zoom: 7
 
+app.drawing = 'inactive'
+
 app.map = new ol.Map
+
+#    interactions: if app.drawing is 'active'
+#        ol.interaction.defaults 
+#            'dragPan':false 
+#    else 
+#        ol.interaction.defaults 
+#            'dragPan':true
+
     target: 'map'
     layers: [app.osm_layer]
     renderer: ol.RendererHint.CANVAS
@@ -68,10 +78,17 @@ app.dataLayers = [
 ]
 
 app.mapControls = [
-    new app.models.ControlModel
-        href:'#sidebar-control'
-        class_disp:'glyphicon glyphicon-indent-right'
-        class_ol:'sidebar-control ol-unselectable'
+        new app.models.ControlModel
+            id:'sidebar'
+            href:'#sidebar-control'
+            class_disp:'glyphicon glyphicon-indent-right'
+            class_ol:'sidebar-control ol-unselectable'
+    ,
+        new app.models.ControlModel
+            id:'draw'
+            href:'#draw-control'
+            class_disp:'glyphicon glyphicon-pencil'
+            class_ol:'draw-control ol-unselectable'
 ]
 
 app.graphs = [

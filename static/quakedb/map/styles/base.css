@@ -32,6 +32,31 @@
     font-size: 15px;
 }
 
+.draw-control {
+    position: absolute;
+    top: 102px;
+    left: 8px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 4px;
+    padding: 3px;
+}
+
+.draw-control a {
+    display: block;
+    color: white;
+    margin: 0px;
+    margin-bottom: 1px;
+    border-radius: 2px;
+    height: 22px;
+    width: 22px;
+    text-align: center;
+    background: rgba(0,60,136,0.5);
+}
+
+.glyphicon-pencil {
+    font-size: 15px;
+}
+
 #sidebar {
     background-color: rgba(0,0,0,0.8);
     position: fixed;
@@ -89,4 +114,10 @@
 
 #graph svg .domain {
     stroke: white;
+}
+
+.select-box {
+    position: absolute;
+    background: rgba(255,255,255,0.5);
+    border: 2px solid #000;
 }

@@ -33,49 +33,116 @@
     };
 
     ControlModel.prototype.initialize = function(options) {
-      return this.set('sidebar', this.createSidebar(options));
+      this.set('sidebar', this.createSidebar(options));
+      return this.set('draw', this.createDraw(options));
     };
 
     ControlModel.prototype.createSidebar = function(options) {
-      app.sidebarControl = function(options) {
-        var anchor, element, toggle;
-        options = options || {};
-        anchor = document.createElement('a');
-        anchor.href = options.href;
-        anchor.className = options.class_disp;
-        $.side = {};
-        $.sidebar = 2;
-        app.sidebar = function(panels) {
-          $.sidebar = panels;
-          if (panels === 1) {
-            return $('#sidebar').animate({
-              right: '-100%'
-            });
-          } else if (panels === 2) {
-            return $('#sidebar').animate({
-              right: '0%'
-            });
-          }
+      if (options.id === 'sidebar') {
+        app.sidebarControl = function(options) {
+          var anchor, element, toggle;
+          options = options || {};
+          anchor = document.createElement('a');
+          anchor.href = options.href;
+          anchor.className = options.class_disp;
+          $.side = {};
+          $.sidebar = 2;
+          app.sidebar = function(panels) {
+            $.sidebar = panels;
+            if (panels === 1) {
+              return $('#sidebar').animate({
+                right: '-100%'
+              });
+            } else if (panels === 2) {
+              return $('#sidebar').animate({
+                right: '0%'
+              });
+            }
+          };
+          toggle = function(e) {
+            e.preventDefault();
+            if ($.sidebar === 2) {
+              return app.sidebar(1);
+            } else {
+              return app.sidebar(2);
+            }
+          };
+          anchor.addEventListener('click', toggle, false);
+          element = document.createElement('div');
+          element.className = options.class_ol;
+          element.appendChild(anchor);
+          return ol.control.Control.call(this, {
+            element: element,
+            target: options.target
+          });
         };
-        toggle = function(e) {
-          e.preventDefault();
-          if ($.sidebar === 2) {
-            return app.sidebar(1);
-          } else {
-            return app.sidebar(2);
-          }
+        ol.inherits(app.sidebarControl, ol.control.Control);
+        return app.map.addControl(new app.sidebarControl(options));
+      }
+    };
+
+    ControlModel.prototype.createDraw = function(options) {
+      if (options.id === 'draw') {
+        app.drawControl = function(options) {
+          var anchor, doDraw, element;
+          options = options || {};
+          anchor = document.createElement('a');
+          anchor.href = options.href;
+          anchor.className = options.class_disp;
+          doDraw = function() {
+            app.drawing = 'active';
+            return $(function() {
+              var $map, $select;
+              $map = $("#map");
+              $select = $('<div>').addClass('select-box');
+              return $map.on('mousedown', function(e) {
+                var click_x, click_y;
+                click_y = e.pageY;
+                click_x = e.pageX;
+                $select.css({
+                  'top': click_y,
+                  'left': click_x,
+                  'width': 0,
+                  'height': 0
+                });
+                $select.appendTo($map);
+                return $map.on('mousemove', function(e) {
+                  var height, move_x, move_y, new_x, new_y, width, _ref1, _ref2;
+                  move_x = e.pageX;
+                  move_y = e.pageY;
+                  width = Math.abs(move_x - click_x);
+                  height = Math.abs(move_y - click_y);
+                  new_x = (_ref1 = move_x < click_x) != null ? _ref1 : click_x - {
+                    width: click_x
+                  };
+                  new_y = (_ref2 = move_y < click_y) != null ? _ref2 : click_y - {
+                    height: click_y
+                  };
+                  return $select.css({
+                    'width': width,
+                    'height': height,
+                    'top': new_y,
+                    'left': new_x
+                  });
+                }).on('mouseup', function(e) {
+                  $map.off('mousemove');
+                  return $select.remove();
+                });
+              });
+            });
+          };
+          anchor.addEventListener('click', doDraw, false);
+          element = document.createElement('div');
+          element.className = options.class_ol;
+          element.appendChild(anchor);
+          return ol.control.Control.call(this, {
+            element: element,
+            target: options.target
+          });
         };
-        anchor.addEventListener('click', toggle, false);
-        element = document.createElement('div');
-        element.className = options.class_ol;
-        element.appendChild(anchor);
-        return ol.control.Control.call(this, {
-          element: element,
-          target: options.target
-        });
-      };
-      ol.inherits(app.sidebarControl, ol.control.Control);
-      return app.map.addControl(new app.sidebarControl(options));
+        ol.inherits(app.drawControl, ol.control.Control);
+        return app.map.addControl(new app.drawControl(options));
+      }
     };
 
     return ControlModel;
