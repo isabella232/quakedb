@@ -38,26 +38,7 @@
 
   map = app.map;
 
-  app.graph_margin = {
-    top: 20,
-    right: 20,
-    bottom: 30,
-    left: 40
-  };
-
-  app.graph_width = 500;
-
-  app.graph_height = 400;
-
-  app.graph_x = d3.scale.linear().range([0, app.graph_width]);
-
-  app.graph_y = d3.scale.linear().range([app.graph_height, 0]);
-
-  app.graph_x_axis = d3.svg.axis().scale(app.graph_x).orient('bottom');
-
-  app.graph_y_axis = d3.svg.axis().scale(app.graph_y).orient('left');
-
-  app.graph_svg = d3.select('#graph').append('svg').attr('width', app.graph_width + app.graph_margin.left + app.graph_margin.right).attr('height', app.graph_height + app.graph_margin.top + app.graph_margin.bottom).append('g').attr('transform', 'translate(' + app.graph_margin.left + ',' + app.graph_margin.top + ')');
+  "app.graph_margin = {top:20, right:20, bottom:30, left:40}\napp.graph_width = 500\napp.graph_height = 400\n\napp.graph_x = d3.scale.linear()\n    .range([0, app.graph_width])\napp.graph_y = d3.scale.linear()\n    .range([app.graph_height, 0])\napp.graph_x_axis = d3.svg.axis()\n    .scale(app.graph_x)\n    .orient('bottom')\napp.graph_y_axis = d3.svg.axis()\n    .scale(app.graph_y)\n    .orient('left')\n\napp.graph_svg = d3.select('#graph').append('svg')\n    .attr('width', app.graph_width + app.graph_margin.left + app.graph_margin.right)\n    .attr('height', app.graph_height + app.graph_margin.top + app.graph_margin.bottom)\n    .append('g')\n    .attr('transform', 'translate(' + app.graph_margin.left + ',' + app.graph_margin.top + ')')";
 
   app.classes = 9;
 
@@ -101,18 +82,11 @@
     })
   ];
 
-  app.graphs = [
-    new app.models.GraphModel({
-      title: "this graph",
-      type: 'linear'
-    })
-  ];
+  "app.graphs = [\n    new app.models.GraphModel\n        title: \"this graph\"\n        type: 'linear'\n]";
 
   app.dataLayerCollection = new app.models.LayerCollection(app.dataLayers);
 
   app.mapControlCollection = new app.models.ControlCollection(app.mapControls);
-
-  app.graphCollection = new app.models.GraphCollection(app.graphs);
 
   app.layers = new app.views.LayerView({
     collection: app.dataLayerCollection

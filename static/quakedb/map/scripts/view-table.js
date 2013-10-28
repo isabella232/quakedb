@@ -50,15 +50,28 @@
     }
 
     TableView.prototype.render = function() {
+      var key_flag;
+      key_flag = false;
       app.selected_data = [];
       return app.map.on(['click'], function(evt) {
         app.map.getFeatures({
           pixel: evt.getPixel(),
           layers: [app.dataLayerCollection.models[0].attributes.layer],
           success: function(feature) {
-            var features;
+            var attributes, capital_keys, features, key, keys, values, _i, _len;
+            capital_keys = [];
             features = feature[0];
-            return app.selected_data.push(features[0].getId());
+            attributes = features[0].getAttributes();
+            keys = _.keys(attributes);
+            for (_i = 0, _len = keys.length; _i < _len; _i++) {
+              key = keys[_i];
+              capital_keys.push(key.charAt(0).toUpperCase() + key.slice(1));
+            }
+            values = _.values(attributes);
+            if (!key_flag) {
+              app.selected_data.push(capital_keys);
+              return key_flag = true;
+            }
           }
         });
         app.othertable = new app.views.OtherTableView({

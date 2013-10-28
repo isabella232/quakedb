@@ -93,13 +93,18 @@
 	margin-top: 10px;
 }
 
-#chart .panel {
+#chart .panel, .panel-heading {
+    overflow: auto;
     background-position: 50% 50%;
     background-repeat: no-repeat;
     display: block;
     margin: 0 auto;
     padding: 3px;
     width: 566px;
+}
+
+#chart .table {
+    border-spacing: 10px;
 }
 
 .axis path,

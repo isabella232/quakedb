@@ -90,6 +90,9 @@
           anchor.href = options.href;
           anchor.className = options.class_disp;
           doDraw = function() {
+            var view;
+            view = app.map.getView();
+            app.map.setView(view);
             app.drawing = 'active';
             return $(function() {
               var $map, $select;

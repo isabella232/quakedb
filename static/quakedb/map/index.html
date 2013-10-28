@@ -16,11 +16,14 @@
     </div>
     <script id="table" type="text/html">
       <div class="panel panel-success">
-        <div class="panel-heading">Attribute Data
-          <table>
+        <div class="panel-heading">Attribute Data				
+          <table class="table">
             <thead>
               <tr>
-                <th><%= data %></th>
+                <% _.each(data, function(key) { %>
+                <% _.each(key, function(k) { %>
+                <th><%= k %></th><% }) %> 
+                <% }); %>
               </tr>
             </thead>
           </table>

@@ -64,6 +64,8 @@ class app.models.ControlModel extends Backbone.Model
 				anchor.className = options.class_disp
 
 				doDraw = () ->
+					view = app.map.getView()
+					app.map.setView(view)
 					app.drawing = 'active'
 					$ ->
 					    $map = $ "#map"

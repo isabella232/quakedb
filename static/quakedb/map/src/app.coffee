@@ -33,6 +33,7 @@ app.map = new ol.Map
 
 map = app.map
 
+"""
 app.graph_margin = {top:20, right:20, bottom:30, left:40}
 app.graph_width = 500
 app.graph_height = 400
@@ -53,7 +54,7 @@ app.graph_svg = d3.select('#graph').append('svg')
     .attr('height', app.graph_height + app.graph_margin.top + app.graph_margin.bottom)
     .append('g')
     .attr('transform', 'translate(' + app.graph_margin.left + ',' + app.graph_margin.top + ')')
-
+"""
 app.classes = 9
 app.color_id = 'YlOrRd'
 app.colors = colorbrewer[app.color_id][app.classes]
@@ -90,16 +91,16 @@ app.mapControls = [
             class_disp:'glyphicon glyphicon-pencil'
             class_ol:'draw-control ol-unselectable'
 ]
-
+"""
 app.graphs = [
     new app.models.GraphModel
         title: "this graph"
         type: 'linear'
 ]
-
+"""
 app.dataLayerCollection = new app.models.LayerCollection app.dataLayers
 app.mapControlCollection = new app.models.ControlCollection app.mapControls
-app.graphCollection = new app.models.GraphCollection app.graphs
+#app.graphCollection = new app.models.GraphCollection app.graphs
 
 app.layers = new app.views.LayerView
     collection: app.dataLayerCollection

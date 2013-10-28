@@ -16,11 +16,16 @@ html(lang="en")
 
 		script#table(type="text/html")
 			.panel.panel-success
-				.panel-heading Attribute Data
-					table
+				.panel-heading Attribute Data				
+					table.table
 						thead
 							tr
-								th <%= data %>
+								<% _.each(data, function(key) { %>
+								<% _.each(key, function(k) { %>
+								th <%= k %>
+								<% }) %> 
+								<% }); %>
+
 		script(src="http://code.jquery.com/jquery-1.9.1.js")
 		script(src="http://code.jquery.com/ui/1.10.3/jquery-ui.js")
 		script(src="vendor/bootstrap-3.0.0/dist/js/bootstrap.min.js")
