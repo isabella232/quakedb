@@ -23,20 +23,17 @@ app.models.LayerModel = Backbone.Model.extend({
 
 // Model for how we define a Leaflet GeoJSON layer
 app.models.GeoJSONLayer = app.models.LayerModel.extend({
-  getJSON: function (callback) {
-  	d3.json(this.get("serviceUrl"), function (err, data) {
-  	  if (err) callback(err);
-  	  callback(data);
-  	})
-  },
   createLayer: function (callback) {
-  	if (this.get("serviceUrl")) {
-  	  var model = this;
-  	  this.getJSON(function (data) {
-  	  	var layer = new L.geoJson(data, model.get("layerOptions"));
-  	  	callback(layer);
-  	  })
-  	}
+    var layer = new L.geoJson(null, this.get("layerOptions"))
+    callback(layer);
+  },
+  getJSON: function (callback) {
+    if (this.get("serviceUrl")) {
+      d3.json(this.get("serviceUrl"), function (err, data) {
+        if (err) callback(err);
+        callback(data);
+      }) 
+    }
   },
 });
 

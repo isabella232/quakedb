@@ -6,10 +6,9 @@ app.views == null ? app.views = app.views = {} : app.views = app.views;
 // Render the basemap
 app.views.BaseMapView = Backbone.View.extend({
   initialize: function (options) {
-  	active = this.findActiveModel();
+  	var active = this.findActiveModel();
   	app.map.addLayer(active.get('layer'));
   },
-  render: function () {},
   findActiveModel: function () {
   	if (this.model.get('active')) return this.model;
   }
@@ -17,14 +16,20 @@ app.views.BaseMapView = Backbone.View.extend({
 
 app.views.dataLayerView = Backbone.View.extend({
   initialize: function (options) {
-  	this.findActiveLayers();
+    this.addDataToLayer();
+    this.findActiveLayers();
   },
-  render: function () {},
   findActiveLayers: function () {
     this.collection.each(function (model) {
-      if (model.get("active")) {
-      	setTimeout(function () {app.map.addLayer(model.get("layer"));}, 3000);
-      }
+      if (model.get("active")) model.get("layer").addTo(app.map);
+    });
+  },
+  addDataToLayer: function () {
+    this.collection.each(function (model) {
+      var layer = model.get("layer");
+      model.getJSON(function (data) {
+        layer.addData(data);
+      })     
     })
   }
 });

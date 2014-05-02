@@ -45,6 +45,14 @@ data = [
   	active: true,
   	layerOptions: {}
   }),
+  new app.models.GeoJSONLayer({
+    id: "stations",
+    layerName: "Seismo Stations",
+    serviceUrl: "data/seismostations.json",
+    serviceType: "WFS",
+    active: true,
+    layerOptions: {}
+  })
 ];
 
 app.dataLayerCollection = new app.models.LayerCollection(data);
