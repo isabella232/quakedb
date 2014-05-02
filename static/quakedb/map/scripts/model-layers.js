@@ -10,6 +10,7 @@ app.models.LayerModel = Backbone.Model.extend({
   	serviceUrl: 'undefined',
   	active: false,
   	detectRetina: true,
+    isExtent: false,
   	layerOptions: 'undefined'
   },
   initialize: function (options) {
@@ -24,7 +25,7 @@ app.models.LayerModel = Backbone.Model.extend({
 // Model for how we define a Leaflet GeoJSON layer
 app.models.GeoJSONLayer = app.models.LayerModel.extend({
   createLayer: function (callback) {
-    var layer = new L.geoJson(null, this.get("layerOptions"))
+    var layer = new L.geoJson(null, this.get("layerOptions"));
     callback(layer);
   },
   getJSON: function (callback) {

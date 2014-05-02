@@ -29,7 +29,11 @@ app.views.dataLayerView = Backbone.View.extend({
       var layer = model.get("layer");
       model.getJSON(function (data) {
         layer.addData(data);
-      })     
+        if (model.get("isExtent") && layer) {
+          app.map.fitBounds(layer);
+          model.set("isExtent", false);
+        }
+      })  
     })
   }
 });

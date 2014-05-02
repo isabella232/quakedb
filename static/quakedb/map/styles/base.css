@@ -1,128 +1,32 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.navbar {
+  margin-bottom: 0;
+}
+
+.navbar-brand img {
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  display: block;
+}
+
 #map {
-	position:absolute;
-	top:0;
-	left:0;
-	right:0;
-	bottom:0;
-	padding:0;
+  position: relative;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
 }
 
-.sidebar-control {
-	position: absolute;
-	top: 65px;
-	left: 8px;
-	background: rgba(255,255,255,0.4);
-	border-radius: 4px;
-	padding: 3px;
-}
-
-.sidebar-control a {
-	display: block;
-	color: white;
-	margin: 0px;
-	margin-bottom: 1px;
-	border-radius: 2px;
-	height: 22px;
-	width: 22px;
-	text-align: center;
-	background: rgba(0,60,136,0.5);
-}
-
-.glyphicon-indent-right {
-    font-size: 15px;
-}
-
-.draw-control {
-    position: absolute;
-    top: 102px;
-    left: 8px;
-    background: rgba(255,255,255,0.4);
-    border-radius: 4px;
-    padding: 3px;
-}
-
-.draw-control a {
-    display: block;
-    color: white;
-    margin: 0px;
-    margin-bottom: 1px;
-    border-radius: 2px;
-    height: 22px;
-    width: 22px;
-    text-align: center;
-    background: rgba(0,60,136,0.5);
-}
-
-.glyphicon-pencil {
-    font-size: 15px;
-}
-
-#sidebar {
-    background-color: rgba(0,0,0,0.8);
-    position: fixed;
-    top: 0;
-    right: 0%;
-    width: 45%;
-    height:100%;
-}
-
-#sidebar img {
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
-    display: block;
-    margin: 0 auto;
-    padding: 3px;
-    height: 180px;
-    width: 580px;
-}
-
-#graph svg {
-    background-color: rgba(255,255,255,0.5);
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
-    display: block;
-    margin: 0 auto;
-    padding: 3px;
-    border-radius: 4px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
-}
-
-#chart {
-	margin-top: 10px;
-}
-
-#chart .panel, .panel-heading {
-    overflow: auto;
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
-    display: block;
-    margin: 0 auto;
-    padding: 3px;
-    width: 566px;
-}
-
-#chart .table {
-    border-spacing: 10px;
-}
-
-.axis path,
-.axis line {
-    fill:none;
-    stroke:#fff;
-    shape-rendering:crispEdges;
-}
-.dot {
-  stroke: #000;
-}
-
-#graph svg .domain {
-    stroke: white;
-}
-
-.select-box {
-    position: absolute;
-    background: rgba(255,255,255,0.5);
-    border: 2px solid #000;
+.custom-div-leaflet:after {
+  font-family: "Glyphicons Halflings";
+  content: "\e124";
+  font-size: 20px;
+  color: rgb(255,203,5);
 }

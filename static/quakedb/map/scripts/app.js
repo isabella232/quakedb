@@ -4,8 +4,8 @@ root.app == null ? app = root.app = {} : app = root.app;
 
 // Make a map
 app.map = L.map('map', {
-  center: [35.024994, -111.820046],
-  zoom: 7,
+  center: [33.742201427591546, -111.87500043600002],
+  zoom: 6,
 });
 
 // Instantiate basemap model/view
@@ -28,11 +28,11 @@ data = [
   	active: true,
   	layerOptions: {
 	    pointToLayer: function (feature, latlng) {
-        var color;
-	      markerOptions = {
-          fillOpacity: 0.8,
-          stroke: 0,
-        }
+        var color,
+	          markerOptions = {
+              fillOpacity: 0.8,
+              stroke: 0,
+            }
         var mag = feature.properties.calculated_magnitude;
         if (0 < mag && mag <= 1) {
           color = "rgb(255,255,204)";
@@ -64,7 +64,28 @@ data = [
   	serviceUrl: "data/activefaults.json",
   	serviceType: "WFS",
   	active: true,
-  	layerOptions: {}
+    isExtent: true,
+  	layerOptions: {
+      style: function (feature) {
+        var color,
+          lineStyle = {
+            weight: 3,
+            fillOpacity: 0,
+            opacity: 1,
+          }
+        var symbol = feature.properties.symbol;
+        if (symbol == "2.13.2") {
+          color = "rgb(37,177,0)";
+        } else if (symbol == "2.13.3") {
+          color = "rgb(0,36,177)";
+        } else if (symbol == "2.13.4") {
+          color = "rgb(139,0,177)";
+        }
+
+        lineStyle.color = color;
+        return lineStyle;
+      }
+    }
   }),
   new app.models.GeoJSONLayer({
     id: "stations",
@@ -72,7 +93,15 @@ data = [
     serviceUrl: "data/seismostations.json",
     serviceType: "WFS",
     active: true,
-    layerOptions: {}
+    useMarker: true,
+    layerOptions: {
+      pointToLayer: function (feature, latlng) {
+        var icon = new L.divIcon({
+          className: "custom-div-leaflet",
+        });
+        return L.marker(latlng, {icon: icon});
+      }
+    }
   })
 ];
 
