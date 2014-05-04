@@ -26,15 +26,15 @@
           <ul class="nav navbar-nav">
             <li><a href="#">Toggle Layers</a></li>
             <li><a href="#">Query Area</a></li>
-            <li><a href="#">Attribute Table</a></li>
+            <li id="content-control"><a href="#">Attribute Table</a></li>
             <li><a href="#">Download Data</a></li>
           </ul>
         </div>
       </div>
     </div>
     <div id="map" class="col-md-12"></div>
-    <div id="attribute-table">
-      
+    <div id="content-tab" class="hidden">
+
     </div>
     <script id="table" type="text/html">
       <div class="panel panel-success">
@@ -60,6 +60,7 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="scripts/model-layers.js"></script>
     <script src="scripts/view-layers.js"></script>
+    <script src="scripts/view-content.js"></script>
     <script src="scripts/app.js"></script>
   </body>
 </html>

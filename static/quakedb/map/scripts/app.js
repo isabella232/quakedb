@@ -110,3 +110,5 @@ app.dataLayerCollection = new app.models.LayerCollection(data);
 app.layers = new app.views.dataLayerView({
   collection: app.dataLayerCollection,
 }).render();
+
+app.content = new app.views.ContentView().render();

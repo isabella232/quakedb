@@ -28,5 +28,16 @@ html, body {
   font-family: "Glyphicons Halflings";
   content: "\e124";
   font-size: 20px;
-  color: rgb(255,203,5);
+  color: blue;
+}
+
+#content-tab {
+  background-color: #000;
+  opacity: 0.5;
+  position: absolute;
+  border-radius: 4px 4px 4px 4px;
+  bottom: 1%;
+  left: 1%;
+  right: 1%;
+  height: 50%;
 }
