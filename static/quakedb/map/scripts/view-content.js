@@ -13,12 +13,12 @@ app.views.ContentView = Backbone.View.extend({
   },
   toggleContent: function (control) {
   	var contentTab = $("#content-tab");
-  	if (contentTab.hasClass("hidden")) {
-  	  contentTab.removeClass("hidden");
-  	  contentTab.addClass("shown");
+  	if (contentTab.hasClass("hide-tab")) {
+  	  contentTab.removeClass("hide-tab");
+  	  contentTab.addClass("show-tab");
   	} else {
-  	  contentTab.removeClass("shown");
-  	  contentTab.addClass("hidden");
+  	  contentTab.removeClass("show-tab");
+  	  contentTab.addClass("hide-tab");
   	}
   }
 });

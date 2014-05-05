@@ -63,7 +63,7 @@ data = [
   	layerName: "Active Faults",
   	serviceUrl: "data/activefaults.json",
   	serviceType: "WFS",
-  	active: true,
+  	active: false,
     isExtent: true,
   	layerOptions: {
       style: function (feature) {
@@ -92,7 +92,7 @@ data = [
     layerName: "Seismo Stations",
     serviceUrl: "data/seismostations.json",
     serviceType: "WFS",
-    active: true,
+    active: false,
     useMarker: true,
     layerOptions: {
       pointToLayer: function (feature, latlng) {
@@ -107,7 +107,8 @@ data = [
 
 app.dataLayerCollection = new app.models.LayerCollection(data);
 
-app.layers = new app.views.dataLayerView({
+app.layers = new app.views.DataLayerView({
+  el: $("#dropmenu").first(),
   collection: app.dataLayerCollection,
 }).render();
 

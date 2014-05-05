@@ -24,7 +24,13 @@
         </div>
         <div class="navbar-collapse collapse navbar-right" id="navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="#">Toggle Layers</a></li>
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                Toggle Layers <span class="caret"></span>
+              </a>
+            <ul id="dropmenu" class="dropdown-menu" role="menu">
+            </ul>
+            </li>
             <li><a href="#">Query Area</a></li>
             <li id="content-control"><a href="#">Attribute Table</a></li>
             <li><a href="#">Download Data</a></li>
@@ -33,7 +39,7 @@
       </div>
     </div>
     <div id="map" class="col-md-12"></div>
-    <div id="content-tab" class="hidden">
+    <div id="content-tab" class="hide-tab">
 
     </div>
     <script id="table" type="text/html">
@@ -52,6 +58,13 @@
         </div>
       </div>
     </script>
+    
+    <script id="toggle-layers-template" type="text/html">
+      <li>
+        <a id=<%= model.get("id") %> href="#"><%= model.get("layerName") %></a>
+      </li>
+    </script>
+
     <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>

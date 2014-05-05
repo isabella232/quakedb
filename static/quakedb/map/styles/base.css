@@ -36,8 +36,19 @@ html, body {
   opacity: 0.5;
   position: absolute;
   border-radius: 4px 4px 4px 4px;
-  bottom: 1%;
   left: 1%;
   right: 1%;
   height: 50%;
+  -webkit-transition: 0.5s linear;
+  -moz-transition: 0.5s linear;
+  -o-transition: 0.5s linear;
+  transition: 0.5s linear;
+}
+
+#content-tab.hide-tab {
+  bottom: -51%;
+}
+
+#content-tab.show-tab {
+  bottom: 1%;
 }
