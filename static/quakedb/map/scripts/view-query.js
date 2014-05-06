@@ -2,3 +2,18 @@
 var root = this;
 root.app == null ? app = root.app = {} : app = root.app;
 app.views == null ? app.views = app.views = {} : app.views = app.views;
+
+app.views.QueryView = Backbone.View.extend({
+  initialize: function () {
+  },
+  events: {
+    "click": "drawQuery"
+  },
+  drawQuery: function () {
+  	var model = this.model;
+  	model.makeQuery();
+  	model.getQueryBounds(function (bounds) {
+  	  console.log(bounds);
+  	})
+  }
+})

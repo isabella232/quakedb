@@ -113,3 +113,8 @@ app.layers = new app.views.DataLayerView({
 }).render();
 
 app.content = new app.views.ContentView().render();
+
+app.query = new app.views.QueryView({
+  el: $("#query-control").first(),
+  model: new app.models.QueryArea(),
+}).render();
