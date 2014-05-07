@@ -11,9 +11,14 @@ app.views.QueryView = Backbone.View.extend({
   },
   drawQuery: function () {
   	var model = this.model;
-  	model.makeQuery();
-  	model.getQueryBounds(function (bounds) {
-  	  console.log(bounds);
-  	})
+    model.makeQuery();
+  },
+  makeQuery: function () {
+    this.makeQuery(function () {
+      model.getBounds(function (featureGroup) {
+        var layers = featureGroup.getLayers();
+        console.log(layers);
+      })
+    })
   }
 })

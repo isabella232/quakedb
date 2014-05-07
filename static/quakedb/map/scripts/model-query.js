@@ -7,15 +7,19 @@ app.models.QueryArea = Backbone.Model.extend({
   defaults: {
   },
   initialize: function () {
+    drawnItems = new L.FeatureGroup();
+    this.set("featureGroup", drawnItems);
   },
   makeQuery: function () {
-  	return new L.Draw.Rectangle(app.map).enable();
-  },
-  getQueryBounds: function (callback) {
+    new L.Draw.Rectangle(app.map).enable();
+    var featureGroup = this.get("featureGroup");
   	app.map.on("draw:created", function (query) {
-  	  var layer = query.layer,
-  	      bounds = layer.getBounds();
-  	  callback(bounds);
+      featureGroup.clearLayers();
+      featureGroup.addLayer(query.layer);
   	})
+  },
+  getBounds: function (callback) {
+    var featureGroup = this.get("featureGroup");
+    callback(featureGroup);
   }
 });
