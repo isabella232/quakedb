@@ -117,4 +117,5 @@ app.content = new app.views.ContentView().render();
 app.query = new app.views.QueryView({
   el: $("#query-control").first(),
   model: new app.models.QueryArea(),
+  collection: app.dataLayerCollection,
 }).render();

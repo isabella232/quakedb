@@ -5,10 +5,12 @@ app.models == null ? app.models = app.models = {} : app.models = app.models;
 
 app.models.QueryArea = Backbone.Model.extend({
   defaults: {
+    queryLayerId: 'earthquakes' 
   },
   initialize: function () {
     drawnItems = new L.FeatureGroup();
     this.set("featureGroup", drawnItems);
+    this.getQueryDataModel();
   },
   makeQuery: function () {
     new L.Draw.Rectangle(app.map).enable();
@@ -21,5 +23,7 @@ app.models.QueryArea = Backbone.Model.extend({
   getBounds: function (callback) {
     var featureGroup = this.get("featureGroup");
     callback(featureGroup);
+  },
+  getQueryDataModel: function () {
   }
 });

@@ -12,6 +12,7 @@ app.views.QueryView = Backbone.View.extend({
   drawQuery: function () {
   	var model = this.model;
     model.makeQuery();
+    
   },
   makeQuery: function () {
     this.makeQuery(function () {
